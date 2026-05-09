@@ -1,7 +1,5 @@
-@"
 # Credenciales y archivos sensibles
-#js/config.js
-#config.js
+# js/config.js ← COMENTADA (se necesita para GitHub Pages)
 
 # Archivos de entorno
 .env
@@ -21,4 +19,6 @@ node_modules/
 
 # Logs
 *.log
-"@ | Out-File -FilePath .gitignore -Encoding UTF8
+
+# Workflows de GitHub (solo si usas template)
+# .github/
