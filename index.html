@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#f8fafc">
+  <title>AquaTrack DW - Iniciar Sesión</title>
+  <link rel="shortcut icon" href="./assets/logo.png" type="image/x-icon">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/auth.css">
+</head>
+<body>
+
+<div class="wrapper">
+  <div class="auth-box">
+
+    <div class="brand">
+      <span class="brand-icon">💧</span>
+      <h1>AquaTrack</h1>
+      <span>DW System</span>
+    </div>
+
+    <div class="switch">
+      <button id="btnLogin" class="active">Iniciar Sesión</button>
+      <button id="btnRegister">Registrarse</button>
+    </div>
+
+    <div id="msg" class="message-box"></div>
+
+    <!-- LOGIN -->
+    <div id="loginForm" class="form active">
+      <div class="input-group">
+        <span class="input-icon">📧</span>
+        <input type="email" id="loginEmail" placeholder="Correo electrónico" autocomplete="email">
+      </div>
+      <div class="input-group">
+        <span class="input-icon">🔒</span>
+        <input type="password" id="loginPassword" placeholder="Contraseña" autocomplete="current-password">
+      </div>
+      <button onclick="login()" class="btn-primary" id="loginBtn">
+        <span class="btn-text">Iniciar Sesión</span>
+      </button>
+    </div>
+
+    <!-- REGISTER -->
+    <div id="registerForm" class="form">
+      <div class="input-group">
+        <span class="input-icon">👤</span>
+        <input type="text" id="registerName" placeholder="Nombre completo" autocomplete="name">
+      </div>
+      <div class="input-group">
+        <span class="input-icon">📧</span>
+        <input type="email" id="registerEmail" placeholder="Correo electrónico" autocomplete="email">
+      </div>
+      <div class="input-group">
+        <span class="input-icon">🔒</span>
+        <input type="password" id="registerPassword" placeholder="Contraseña (mín. 6 caracteres)" autocomplete="new-password">
+      </div>
+      <button onclick="register()" class="btn-primary" id="registerBtn">
+        <span class="btn-text">Crear Cuenta</span>
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/config.js"></script>
+<script src="js/toast.js"></script>
+<script src="js/modal.js"></script>
+<script src="js/auth.js"></script>
+
+<script>
+  // Tab switching
+  const loginBtn = document.getElementById('btnLogin');
+  const registerBtn = document.getElementById('btnRegister');
+  const loginForm = document.getElementById('loginForm');
+  const registerForm = document.getElementById('registerForm');
+  const msg = document.getElementById('msg');
+
+  function switchTab(tab) {
+    if (tab === 'login') {
+      loginBtn.classList.add('active');
+      registerBtn.classList.remove('active');
+      loginForm.classList.add('active');
+      registerForm.classList.remove('active');
+    } else {
+      registerBtn.classList.add('active');
+      loginBtn.classList.remove('active');
+      registerForm.classList.add('active');
+      loginForm.classList.remove('active');
+    }
+    msg.className = 'message-box';
+    msg.textContent = '';
+  }
+
+  loginBtn.onclick = () => switchTab('login');
+  registerBtn.onclick = () => switchTab('register');
+
+  // Enter key para submit
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      const activeForm = document.querySelector('.form.active');
+      if (activeForm.id === 'loginForm') login();
+      else register();
+    }
+  });
+</script>
+
+</body>
+</html>

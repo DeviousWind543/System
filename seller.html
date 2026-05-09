@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#f8fafc">
+  <title>Vendedor - AquaTrack DW</title>
+  <link rel="shortcut icon" href="./assets/logo.png" type="image/x-icon">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/seller.css">
+</head>
+<body>
+
+<div class="dashboard">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-icon">💧</span>
+      <div>
+        <h3>AquaTrack</h3>
+        <span>Panel Vendedor</span>
+      </div>
+    </div>
+    
+    <nav class="sidebar-nav">
+      <a href="#sell" class="nav-item active" data-section="sell">
+        <span class="nav-icon">🛒</span>
+        <span class="nav-label">Nueva Venta</span>
+      </a>
+      <a href="#sales" class="nav-item" data-section="sales">
+        <span class="nav-icon">📋</span>
+        <span class="nav-label">Mis Ventas</span>
+        <span class="nav-badge" id="sidebarSaleCount">0</span>
+      </a>
+      <a href="#analytics" class="nav-item" data-section="analytics">
+        <span class="nav-icon">📈</span>
+        <span class="nav-label">Estadísticas</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-avatar" id="userAvatar">V</div>
+        <div class="user-info">
+          <span class="user-name" id="sidebarUserName">Vendedor</span>
+          <span class="user-email" id="sidebarUserEmail">vendedor@email.com</span>
+        </div>
+      </div>
+      <button class="btn-logout-sidebar" onclick="logout()">
+        <span>🚪</span> Salir
+      </button>
+    </div>
+  </aside>
+
+  <!-- OVERLAY MÓVIL -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="main-content">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <button class="btn-menu" id="btnMenu" aria-label="Menú">
+        <span></span><span></span><span></span>
+      </button>
+      
+      <div class="topbar-brand-mobile">
+        <span>💧</span> AquaTrack
+      </div>
+
+      <div class="topbar-search">
+        <span class="search-icon">🔍</span>
+        <input type="text" placeholder="Buscar ventas..." id="globalSearch">
+      </div>
+
+      <div class="topbar-actions">
+        <span class="badge badge-seller" id="userRoleDisplay">Vendedor</span>
+        <button class="btn-logout-top" onclick="logout()">Cerrar sesión</button>
+      </div>
+    </header>
+
+    <!-- STATS CARDS -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#dbeafe;color:#3b82f6;">📦</div>
+        <div class="stat-info">
+          <span class="stat-value" id="statTotalSales">0</span>
+          <span class="stat-label">Total Ventas</span>
+        </div>
+        <div class="stat-trend" id="trendSales">→ Hoy</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#d1fae5;color:#10b981;">💵</div>
+        <div class="stat-info">
+          <span class="stat-value" id="statRevenue">$0</span>
+          <span class="stat-label">Ingresos Totales</span>
+        </div>
+        <div class="stat-trend" id="trendRevenue">→ Hoy</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#fef3c7;color:#f59e0b;">🎯</div>
+        <div class="stat-info">
+          <span class="stat-value" id="statToday">0</span>
+          <span class="stat-label">Ventas Hoy</span>
+        </div>
+        <div class="stat-trend" id="trendToday">→ Hoy</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#fce7f3;color:#ec4899;">💧</div>
+        <div class="stat-info">
+          <span class="stat-value" id="statProducts">0</span>
+          <span class="stat-label">Productos</span>
+        </div>
+        <div class="stat-trend stable">→ Variedad</div>
+      </div>
+    </div>
+
+    <!-- SECCIONES -->
+    <div class="sections-container">
+
+      <!-- SECCIÓN: NUEVA VENTA -->
+      <section class="content-section active" id="section-sell">
+        <div class="section-header">
+          <h2>🛒 Registrar Nueva Venta</h2>
+        </div>
+        <div class="card form-card">
+          <div class="form-group">
+            <label class="form-label">Producto</label>
+            <select class="form-select" id="tamanoBidon">
+              <option value="">Seleccionar tamaño...</option>
+              <option value="Bidón 20L">💧 Bidón 20 Litros</option>
+              <option value="Bidón 12L">💧 Bidón 12 Litros</option>
+              <option value="Bidón 5L">💧 Bidón 5 Litros</option>
+              <option value="Bidón 1L">💧 Bidón 1 Litro</option>
+              <option value="Botella 500ml">🧴 Botella 500 ml</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Cantidad</label>
+              <input type="number" class="form-input" id="cantidad" placeholder="0" min="1">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Precio Unitario ($)</label>
+              <input type="number" class="form-input" id="precio" placeholder="0.00" min="0.01" step="0.01">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Fecha de Venta</label>
+            <input type="date" class="form-input" id="fechaVenta">
+          </div>
+
+          <button class="btn btn-primary btn-lg" onclick="agregarVenta()">
+            📝 Registrar Venta
+          </button>
+        </div>
+      </section>
+
+      <!-- SECCIÓN: MIS VENTAS -->
+      <section class="content-section" id="section-sales">
+        <div class="section-header">
+          <h2>📋 Mis Ventas</h2>
+          <div class="section-actions">
+            <input type="date" class="form-input form-input-sm" id="filterDate" onchange="filtrarPorFecha()" style="width:auto;">
+            <button class="btn btn-sm btn-outline" onclick="exportarVentas()">📥 Exportar</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Producto</th>
+                  <th>Cant</th>
+                  <th>Precio</th>
+                  <th>Total</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="salesTable">
+                <tr><td colspan="6"><div class="empty-state"><div class="loading-spinner"></div><p>Cargando ventas...</p></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECCIÓN: ESTADÍSTICAS -->
+      <section class="content-section" id="section-analytics">
+        <div class="section-header">
+          <h2>📈 Estadísticas</h2>
+          <select class="form-input form-input-sm" id="chartPeriod" onchange="actualizarGraficos()" style="width:auto;">
+            <option value="7">Últimos 7 días</option>
+            <option value="30" selected>Últimos 30 días</option>
+            <option value="90">Últimos 90 días</option>
+          </select>
+        </div>
+        <div class="charts-grid">
+          <div class="card">
+            <h3 style="font-size:14px;margin-bottom:16px;color:#64748b;">Ventas por Día</h3>
+            <div class="chart-container" style="min-height:300px;">
+              <canvas id="salesChart"></canvas>
+            </div>
+          </div>
+          <div class="card">
+            <h3 style="font-size:14px;margin-bottom:16px;color:#64748b;">Productos Vendidos</h3>
+            <div class="chart-container" style="min-height:300px;">
+              <canvas id="productsChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<!-- BOTTOM NAV (MÓVIL) -->
+<nav class="bottom-nav" id="bottomNav">
+  <button class="bottom-nav-item active" data-section="sell">
+    <span>🛒</span><small>Vender</small>
+  </button>
+  <button class="bottom-nav-item" data-section="sales">
+    <span>📋</span><small>Ventas</small>
+  </button>
+  <button class="bottom-nav-item" data-section="analytics">
+    <span>📈</span><small>Stats</small>
+  </button>
+</nav>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script src="js/config.js"></script>
+<script src="js/toast.js"></script>
+<script src="js/modal.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/seller.js"></script>
+</body>
+</html>
