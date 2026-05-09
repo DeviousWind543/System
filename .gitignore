@@ -1,7 +1,7 @@
 @"
 # Credenciales y archivos sensibles
-js/config.js
-config.js
+#js/config.js
+#config.js
 
 # Archivos de entorno
 .env
