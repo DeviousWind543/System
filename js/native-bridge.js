@@ -85,23 +85,53 @@ function base64ToFile(base64String, format) {
     return new File([blob], `photo-${Date.now()}.${format}`, { type: `image/${format}` });
 }
 
-// ==================== PICK IMAGE (SIMPLIFICADO) ====================
-async function pickImageForInput(inputId) {
-    // En navegador, abrir input file directamente
-    if (!isNativeApp()) {
+// ==================== MOSTRAR PREVIEW ====================
+function showPreviewForInput(inputId, file) {
+    // Eliminar preview anterior
+    const oldPreview = document.getElementById('preview_' + inputId);
+    if (oldPreview) oldPreview.remove();
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const preview = document.createElement('div');
+        preview.id = 'preview_' + inputId;
+        preview.style.cssText = 'display:flex;align-items:center;gap:10px;margin-top:10px;padding:10px;background:#f0fdf4;border-radius:10px;border:1px solid #86efac;';
+        preview.innerHTML = `
+            <img src="${e.target.result}" style="width:60px;height:60px;border-radius:10px;object-fit:cover;border:2px solid #10b981;">
+            <div style="flex:1;">
+                <div style="font-size:12px;color:#065f46;font-weight:600;">✅ Imagen seleccionada</div>
+                <div style="font-size:10px;color:#64748b;">${(file.size/1024).toFixed(1)} KB</div>
+            </div>
+            <button onclick="this.parentElement.remove();document.getElementById('${inputId}').value='';" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:18px;flex-shrink:0;">×</button>
+        `;
+        // Insertar después del input
         const input = document.getElementById(inputId);
-        if (input) input.click();
+        if (input && input.parentNode) {
+            input.parentNode.appendChild(preview);
+        }
+    };
+    reader.readAsDataURL(file);
+}
+
+// ==================== PICK IMAGE (COMPLETO) ====================
+async function pickImageForInput(inputId) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+
+    // SIEMPRE: si no es app nativa, abrir el input file
+    if (!isNativeApp()) {
+        input.click();
         return;
     }
     
-    // En app nativa: menú cámara/galería
+    // APP NATIVA: mostrar menú cámara/galería
     const action = await new Promise((resolve) => {
         const ov = document.createElement('div');
         ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99999;display:flex;align-items:flex-end;justify-content:center;';
         ov.innerHTML = `<div style="background:white;border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:400px;">
             <p style="text-align:center;font-weight:700;font-size:16px;margin-bottom:16px;">📷 Seleccionar imagen</p>
-            <button id="_cam" style="width:100%;padding:14px;border:none;background:#f8fafc;border-radius:12px;font-size:15px;font-weight:600;margin-bottom:8px;cursor:pointer;">📸 Tomar foto</button>
-            <button id="_gal" style="width:100%;padding:14px;border:none;background:#f8fafc;border-radius:12px;font-size:15px;font-weight:600;margin-bottom:12px;cursor:pointer;">🖼️ Galería</button>
+            <button id="_cam" style="width:100%;padding:14px;border:none;background:#f8fafc;border-radius:12px;font-size:15px;font-weight:600;margin-bottom:8px;cursor:pointer;">📸 Tomar foto con cámara</button>
+            <button id="_gal" style="width:100%;padding:14px;border:none;background:#f8fafc;border-radius:12px;font-size:15px;font-weight:600;margin-bottom:12px;cursor:pointer;">🖼️ Elegir de galería</button>
             <button id="_can" style="width:100%;padding:14px;border:none;background:white;border-radius:12px;font-size:15px;font-weight:600;color:#ef4444;cursor:pointer;">Cancelar</button>
         </div>`;
         document.body.appendChild(ov);
@@ -116,77 +146,26 @@ async function pickImageForInput(inputId) {
     const file = action === 'camera' ? await takePhoto() : await pickFromGallery();
     if (!file) return;
     
-    // Poner el archivo en el input
-    const input = document.getElementById(inputId);
-    if (!input) return;
-    
+    // Asignar archivo al input
     const dt = new DataTransfer();
     dt.items.add(file);
     input.files = dt.files;
     
-    // Mostrar preview DEBAJO del botón que llamó esta función
-    const button = document.querySelector(`[onclick*="pickImageForInput('${inputId}')"]`);
+    // Mostrar preview
+    showPreviewForInput(inputId, file);
     
-    // Eliminar preview anterior si existe
-    const oldPreview = document.getElementById('preview_' + inputId);
-    if (oldPreview) oldPreview.remove();
-    
-    // Crear nuevo preview
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        const preview = document.createElement('div');
-        preview.id = 'preview_' + inputId;
-        preview.style.cssText = 'display:flex;align-items:center;gap:10px;margin-top:10px;padding:10px;background:#f0fdf4;border-radius:10px;border:1px solid #86efac;';
-        preview.innerHTML = `
-            <img src="${e.target.result}" style="width:60px;height:60px;border-radius:10px;object-fit:cover;border:2px solid #10b981;">
-            <div style="flex:1;">
-                <div style="font-size:12px;color:#065f46;font-weight:600;">✅ Imagen seleccionada</div>
-                <div style="font-size:10px;color:#64748b;">${(file.size/1024).toFixed(1)} KB</div>
-            </div>
-            <button onclick="this.parentElement.remove();document.getElementById('${inputId}').value='';" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:18px;flex-shrink:0;">×</button>
-        `;
-        if (button && button.parentNode) {
-            button.parentNode.appendChild(preview);
-        }
-    };
-    reader.readAsDataURL(file);
-    
-    toast.success('📷 Imagen lista');
+    toast.success('📷 Imagen lista para subir');
 }
-// ==================== PREVIEW DE ARCHIVO SELECCIONADO ====================
+
+// ==================== PREVIEW CUANDO SE SELECCIONA ARCHIVO MANUALMENTE ====================
 function showFilePreview(input) {
     const file = input.files[0];
     if (!file) return;
-    
-    const previewId = input.id + '_preview';
-    let preview = document.getElementById(previewId);
-    
-    // Si no existe el div preview, crearlo después del input
-    if (!preview) {
-        preview = document.createElement('div');
-        preview.id = previewId;
-        preview.style.cssText = 'display:flex;align-items:center;gap:10px;margin-top:8px;padding:10px;background:#f0fdf4;border-radius:10px;border:1px solid #86efac;';
-        input.parentNode.appendChild(preview);
-    }
-    
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        preview.innerHTML = `
-            <img src="${e.target.result}" style="width:60px;height:60px;border-radius:10px;object-fit:cover;border:2px solid #10b981;">
-            <div style="flex:1;">
-                <div style="font-size:12px;color:#065f46;font-weight:600;">✅ Imagen seleccionada</div>
-                <div style="font-size:10px;color:#64748b;">${(file.size/1024).toFixed(1)} KB - ${file.name}</div>
-            </div>
-            <button onclick="this.parentElement.style.display='none';document.getElementById('${input.id}').value='';" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:18px;">×</button>
-        `;
-        preview.style.display = 'flex';
-    };
-    reader.readAsDataURL(file);
-    
+    showPreviewForInput(input.id, file);
     if (typeof toast !== 'undefined') toast.success('📷 Imagen lista');
 }
 
-window.showFilePreview = showFilePreview;
 window.pickImageForInput = pickImageForInput;
+window.showFilePreview = showFilePreview;
 
 })();

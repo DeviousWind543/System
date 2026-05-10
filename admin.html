@@ -277,13 +277,16 @@
               <input type="text" class="form-input" id="itemDescription" placeholder="Detalles adicionales...">
             </div>
           </div>
-          <div class="form-group" style="margin-top:12px;">
-            <label class="form-label">📷 Foto del Item</label>
-          <div style="display:flex;gap:8px;align-items:center;">
-            <input type="file" id="itemImage" accept="image/*" style="font-size:13px;font-family:inherit;padding:8px;" onchange="showFilePreview(this)">
-          <div id="itemImage_preview" style="display:none;align-items:center;gap:10px;margin-top:8px;"></div>
-        </div>
-          </div>
+<div class="form-group" style="margin-top:12px;">
+    <label class="form-label">📷 Foto del Item</label>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <input type="file" id="itemImage" accept="image/*" onchange="showFilePreview(this)" style="flex:1;min-width:200px;font-size:13px;font-family:inherit;">
+        <button type="button" onclick="pickImageForInput('itemImage')" style="padding:8px 14px;border-radius:10px;border:1px solid #3b82f6;background:#eff6ff;color:#3b82f6;font-weight:600;cursor:pointer;font-family:inherit;font-size:12px;white-space:nowrap;">
+            📸 Tomar foto
+        </button>
+    </div>
+    <div id="itemImage_preview" style="margin-top:8px;"></div>
+</div>
           <div id="itemImage_preview" style="display:none;align-items:center;gap:10px;margin-top:8px;"></div>
           <div style="display:flex;gap:10px;margin-top:16px;">
             <button class="btn btn-outline" onclick="document.getElementById('formAddItem').style.display='none'">Cancelar</button>
