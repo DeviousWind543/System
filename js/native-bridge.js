@@ -1,80 +1,136 @@
 /**
  * native-bridge.js - Funcionalidades nativas para AquaTrack DW
+ * Usa Capacitor global sin imports dinámicos
  */
 (function() {
 
 const isNativeApp = () => {
-    return typeof window.Capacitor !== 'undefined' && window.Capacitor.isNativePlatform();
+    return typeof Capacitor !== 'undefined' && Capacitor.isNativePlatform();
 };
+
+// Esperar a que Capacitor esté listo
+async function waitForCapacitor() {
+    return new Promise((resolve) => {
+        if (typeof Capacitor !== 'undefined' && Capacitor.Plugins) {
+            resolve();
+            return;
+        }
+        document.addEventListener('deviceready', resolve, { once: true });
+        document.addEventListener('DOMContentLoaded', () => {
+            // Timeout de seguridad
+            setTimeout(resolve, 1000);
+        }, { once: true });
+    });
+}
 
 // ==================== PERMISOS ====================
 async function checkAndRequestCameraPermission() {
     if (!isNativeApp()) return true;
     try {
-        const { Camera } = await import('@capacitor/camera');
+        const Camera = Capacitor.Plugins.Camera;
+        if (!Camera) {
+            console.error('Plugin Camera no disponible');
+            return false;
+        }
         const status = await Camera.checkPermissions();
+        console.log('📷 Estado permiso:', status.camera);
         if (status.camera === 'granted') return true;
         const request = await Camera.requestPermissions();
-        if (request.camera === 'granted') return true;
-        toast.warning('Permiso denegado. Actívalo en Ajustes > Apps > AquaTrack > Permisos');
+        console.log('📷 Solicitado:', request.camera);
+        return request.camera === 'granted';
+    } catch (e) {
+        console.error('Error permisos:', e);
         return false;
-    } catch (e) { return false; }
+    }
 }
 
 // ==================== BOTÓN RETROCEDER ====================
-if (isNativeApp()) {
-    window.Capacitor.Plugins.App.addListener('backButton', ({ canGoBack }) => {
-        const overlays = document.querySelectorAll('[style*="z-index:9999"], [style*="z-index:99999"], .modal-overlay-aw');
-        if (overlays.length > 0) {
-            overlays[overlays.length-1].remove();
-            document.body.style.overflow = '';
-            return;
-        }
-        const sidebar = document.getElementById('sidebar');
-        if (sidebar && sidebar.classList.contains('open')) {
-            sidebar.classList.remove('open');
-            document.getElementById('sidebarOverlay')?.classList.remove('visible');
-            document.body.style.overflow = '';
-            return;
-        }
-        if (!canGoBack) {
-            if (confirm('¿Deseas salir de AquaTrack?')) window.Capacitor.Plugins.App.exitApp();
-        } else {
-            window.history.back();
-        }
-    });
-}
+document.addEventListener('DOMContentLoaded', async () => {
+    if (!isNativeApp()) return;
+    await waitForCapacitor();
+    try {
+        Capacitor.Plugins.App.addListener('backButton', ({ canGoBack }) => {
+            const overlays = document.querySelectorAll('[style*="z-index:9999"], [style*="z-index:99999"], .modal-overlay-aw');
+            if (overlays.length > 0) {
+                overlays[overlays.length-1].remove();
+                document.body.style.overflow = '';
+                return;
+            }
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar && sidebar.classList.contains('open')) {
+                sidebar.classList.remove('open');
+                document.getElementById('sidebarOverlay')?.classList.remove('visible');
+                document.body.style.overflow = '';
+                return;
+            }
+            if (!canGoBack) {
+                if (confirm('¿Deseas salir de AquaTrack?')) Capacitor.Plugins.App.exitApp();
+            } else {
+                window.history.back();
+            }
+        });
+    } catch (e) {
+        console.log('backButton no disponible:', e.message);
+    }
+});
 
 // ==================== TOMAR FOTO ====================
 async function takePhoto() {
     if (!isNativeApp()) return null;
-    if (!(await checkAndRequestCameraPermission())) return null;
+    const Camera = Capacitor.Plugins.Camera;
+    if (!Camera) {
+        console.error('❌ Camera plugin no encontrado');
+        alert('Cámara no disponible. Verifica los permisos.');
+        return null;
+    }
+    
+    const hasPermission = await checkAndRequestCameraPermission();
+    if (!hasPermission) {
+        alert('Permiso de cámara denegado');
+        return null;
+    }
+    
     try {
-        const { Camera, CameraResultType, CameraSource } = await import('@capacitor/camera');
         const image = await Camera.getPhoto({
-            quality: 90, allowEditing: true,
-            resultType: CameraResultType.Base64,
-            source: CameraSource.Camera,
-            width: 800, height: 800, correctOrientation: true
+            quality: 90,
+            allowEditing: true,
+            resultType: 'base64',
+            source: 'CAMERA',
+            width: 800,
+            height: 800,
+            correctOrientation: true
         });
         return base64ToFile(image.base64String, image.format);
-    } catch (e) { return null; }
+    } catch (e) {
+        console.error('Error cámara:', e);
+        return null;
+    }
 }
 
 // ==================== GALERÍA ====================
 async function pickFromGallery() {
     if (!isNativeApp()) return null;
-    if (!(await checkAndRequestCameraPermission())) return null;
+    const Camera = Capacitor.Plugins.Camera;
+    if (!Camera) return null;
+    
+    const hasPermission = await checkAndRequestCameraPermission();
+    if (!hasPermission) return null;
+    
     try {
-        const { Camera, CameraResultType, CameraSource } = await import('@capacitor/camera');
         const image = await Camera.getPhoto({
-            quality: 90, allowEditing: true,
-            resultType: CameraResultType.Base64,
-            source: CameraSource.Photos,
-            width: 800, height: 800, correctOrientation: true
+            quality: 90,
+            allowEditing: true,
+            resultType: 'base64',
+            source: 'PHOTOS',
+            width: 800,
+            height: 800,
+            correctOrientation: true
         });
         return base64ToFile(image.base64String, image.format);
-    } catch (e) { return null; }
+    } catch (e) {
+        console.error('Error galería:', e);
+        return null;
+    }
 }
 
 function base64ToFile(base64String, format) {
@@ -87,7 +143,6 @@ function base64ToFile(base64String, format) {
 
 // ==================== MOSTRAR PREVIEW ====================
 function showPreviewForInput(inputId, file) {
-    // Eliminar preview anterior
     const oldPreview = document.getElementById('preview_' + inputId);
     if (oldPreview) oldPreview.remove();
 
@@ -104,7 +159,6 @@ function showPreviewForInput(inputId, file) {
             </div>
             <button onclick="this.parentElement.remove();document.getElementById('${inputId}').value='';" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:18px;flex-shrink:0;">×</button>
         `;
-        // Insertar después del input
         const input = document.getElementById(inputId);
         if (input && input.parentNode) {
             input.parentNode.appendChild(preview);
@@ -113,25 +167,25 @@ function showPreviewForInput(inputId, file) {
     reader.readAsDataURL(file);
 }
 
-// ==================== PICK IMAGE (COMPLETO) ====================
+// ==================== PICK IMAGE ====================
 async function pickImageForInput(inputId) {
     const input = document.getElementById(inputId);
     if (!input) return;
 
-    // SIEMPRE: si no es app nativa, abrir el input file
+    // NO ES APP NATIVA: abrir input file
     if (!isNativeApp()) {
         input.click();
         return;
     }
     
-    // APP NATIVA: mostrar menú cámara/galería
+    // APP NATIVA: menú cámara/galería
     const action = await new Promise((resolve) => {
         const ov = document.createElement('div');
         ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99999;display:flex;align-items:flex-end;justify-content:center;';
         ov.innerHTML = `<div style="background:white;border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:400px;">
             <p style="text-align:center;font-weight:700;font-size:16px;margin-bottom:16px;">📷 Seleccionar imagen</p>
-            <button id="_cam" style="width:100%;padding:14px;border:none;background:#f8fafc;border-radius:12px;font-size:15px;font-weight:600;margin-bottom:8px;cursor:pointer;">📸 Tomar foto con cámara</button>
-            <button id="_gal" style="width:100%;padding:14px;border:none;background:#f8fafc;border-radius:12px;font-size:15px;font-weight:600;margin-bottom:12px;cursor:pointer;">🖼️ Elegir de galería</button>
+            <button id="_cam" style="width:100%;padding:14px;border:none;background:#f8fafc;border-radius:12px;font-size:15px;font-weight:600;margin-bottom:8px;cursor:pointer;">📸 Cámara</button>
+            <button id="_gal" style="width:100%;padding:14px;border:none;background:#f8fafc;border-radius:12px;font-size:15px;font-weight:600;margin-bottom:12px;cursor:pointer;">🖼️ Galería</button>
             <button id="_can" style="width:100%;padding:14px;border:none;background:white;border-radius:12px;font-size:15px;font-weight:600;color:#ef4444;cursor:pointer;">Cancelar</button>
         </div>`;
         document.body.appendChild(ov);
@@ -146,18 +200,15 @@ async function pickImageForInput(inputId) {
     const file = action === 'camera' ? await takePhoto() : await pickFromGallery();
     if (!file) return;
     
-    // Asignar archivo al input
     const dt = new DataTransfer();
     dt.items.add(file);
     input.files = dt.files;
     
-    // Mostrar preview
     showPreviewForInput(inputId, file);
     
-    toast.success('📷 Imagen lista para subir');
+    if (typeof toast !== 'undefined') toast.success('📷 Imagen lista para subir');
 }
 
-// ==================== PREVIEW CUANDO SE SELECCIONA ARCHIVO MANUALMENTE ====================
 function showFilePreview(input) {
     const file = input.files[0];
     if (!file) return;
