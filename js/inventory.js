@@ -143,18 +143,11 @@ async function editInventoryItem(id) {
             <div><label style="font-size:12px;font-weight:600;color:#475569">Stock Mínimo</label><input type="number" id="eMin" value="${item.min_quantity||5}" min="0" style="width:100%;padding:10px;border:1px solid #e2e8f0;border-radius:10px;font-size:14px"></div>
         </div>
         <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:#475569">Descripción</label><textarea id="eDesc" rows="2" style="width:100%;padding:10px;border:1px solid #e2e8f0;border-radius:10px;font-size:14px;resize:vertical">${escapeHtml(item.description||'')}</textarea></div>
-       <div style="margin-bottom:16px">
-    <label style="font-size:12px;font-weight:600;color:#475569;margin-bottom:5px;display:block;">📷 Nueva imagen</label>
-    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-        <input type="file" id="eImg" accept="image/*" style="font-size:13px;flex:1;min-width:150px;">
-        <button type="button" onclick="openCameraForInput('eImg')" style="padding:8px 14px;border-radius:10px;border:1px solid #e2e8f0;background:#f8fafc;color:#475569;font-weight:600;cursor:pointer;font-family:inherit;font-size:12px;display:flex;align-items:center;gap:6px;white-space:nowrap;">
-            📸 Cámara
-        </button>
-        <button type="button" onclick="openGalleryForInput('eImg')" style="padding:8px 14px;border-radius:10px;border:1px solid #e2e8f0;background:#f8fafc;color:#475569;font-weight:600;cursor:pointer;font-family:inherit;font-size:12px;display:flex;align-items:center;gap:6px;white-space:nowrap;">
-            🖼️ Galería
-        </button>
-    </div>
-</div>
+        <div style="margin-bottom:16px">
+            <label style="font-size:12px;font-weight:600;color:#475569;margin-bottom:5px;display:block;">📷 Nueva imagen</label>
+            <input type="file" id="eImg" accept="image/*" style="font-size:13px;padding:8px;width:100%;" onchange="showFilePreview(this)">
+            <div id="eImg_preview" style="display:none;align-items:center;gap:10px;margin-top:8px;"></div>
+        </div>
        <div data-img-container style="margin-bottom:10px;${item.image_url ? '' : 'display:none;'}display:flex;align-items:center;gap:10px;">
     ${item.image_url ? `
         <img src="${item.image_url}" style="width:80px;height:80px;border-radius:10px;object-fit:cover;border:2px solid #e2e8f0;cursor:pointer" onclick="previewImage('${item.image_url}','${escapeHtml(item.name)}')">

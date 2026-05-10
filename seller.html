@@ -89,15 +89,12 @@
             <div class="form-group"><label class="form-label">Unidad</label><input type="text" class="form-input" id="itemUnit" value="unidad"></div>
             <div class="form-group"><label class="form-label">Descripción</label><input type="text" class="form-input" id="itemDescription" placeholder="Opcional"></div>
           </div>
-          <div class="form-group" style="margin-top:12px;"><label class="form-label">📷 Foto</label><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-    <input type="file" id="itemImage" accept="image/*" style="font-size:13px;font-family:inherit;flex:1;min-width:150px;">
-    <button type="button" onclick="openCameraForInput('itemImage')" style="padding:8px 14px;border-radius:10px;border:1px solid #e2e8f0;background:#f8fafc;color:#475569;font-weight:600;cursor:pointer;font-family:inherit;font-size:12px;display:flex;align-items:center;gap:6px;white-space:nowrap;">
-        📸 Cámara
-    </button>
-    <button type="button" onclick="openGalleryForInput('itemImage')" style="padding:8px 14px;border-radius:10px;border:1px solid #e2e8f0;background:#f8fafc;color:#475569;font-weight:600;cursor:pointer;font-family:inherit;font-size:12px;display:flex;align-items:center;gap:6px;white-space:nowrap;">
-        🖼️ Galería
-    </button>
-</div></div>
+          <div class="form-group" style="margin-top:12px;"><label class="form-label">📷 Foto</label>
+            <div style="display:flex;gap:8px;align-items:center;">
+            <input type="file" id="itemImage" accept="image/*" style="font-size:13px;font-family:inherit;padding:8px;" onchange="showFilePreview(this)">
+            <div id="itemImage_preview" style="display:none;align-items:center;gap:10px;margin-top:8px;"></div>
+          </div>
+          </div>
           <div id="itemImage_preview" style="display:none;align-items:center;gap:10px;margin-top:8px;"></div>
           <div style="display:flex;gap:10px;margin-top:16px;"><button class="btn btn-outline" onclick="document.getElementById('formAddItem').style.display='none'">Cancelar</button><button class="btn btn-primary" onclick="addInventoryItem()"><i data-lucide="save" style="width:14px;height:14px;"></i> Guardar Item</button></div>
         </div>
