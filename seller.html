@@ -92,12 +92,12 @@
 <div class="form-group" style="margin-top:12px;">
     <label class="form-label">📷 Foto del Item</label>
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-        <input type="file" id="itemImage" accept="image/*" onchange="showFilePreview(this)" style="flex:1;min-width:200px;font-size:13px;font-family:inherit;">
-        <button type="button" onclick="pickImageForInput('itemImage')" style="padding:8px 14px;border-radius:10px;border:1px solid #3b82f6;background:#eff6ff;color:#3b82f6;font-weight:600;cursor:pointer;font-family:inherit;font-size:12px;white-space:nowrap;">
-            📸 Tomar foto
-        </button>
-    </div>
-    <div id="itemImage_preview" style="margin-top:8px;"></div>
+                 <input type="file" id="itemImage" accept="image/*" onchange="showFilePreview(this)" style="display:none;">
+          <button type="button" onclick="pickImageForInput('itemImage')" style="width:100%;padding:10px 16px;border-radius:10px;border:1px solid #e2e8f0;background:#f8fafc;color:#475569;font-weight:600;cursor:pointer;font-family:inherit;font-size:13px;display:flex;align-items:center;justify-content:center;gap:8px;">
+              📷 Agregar imagen
+          </button>
+          </div>
+          <div id="itemImage_preview" style="margin-top:8px;"></div>
 </div>
           <div id="itemImage_preview" style="display:none;align-items:center;gap:10px;margin-top:8px;"></div>
           <div style="display:flex;gap:10px;margin-top:16px;"><button class="btn btn-outline" onclick="document.getElementById('formAddItem').style.display='none'">Cancelar</button><button class="btn btn-primary" onclick="addInventoryItem()"><i data-lucide="save" style="width:14px;height:14px;"></i> Guardar Item</button></div>
@@ -141,7 +141,6 @@ function toggleCheckRetorno() {
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
-<script src="https://cdn.jsdelivr.net/npm/@capacitor/camera@5/dist/plugin.js"></script>
 <script src="js/native-bridge.js"></script>
 <script src="js/config.js"></script>
 <script src="js/toast.js"></script>

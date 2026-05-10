@@ -1,6 +1,6 @@
 /**
  * native-bridge.js - Funcionalidades nativas para AquaTrack DW
- * Usa Capacitor global sin imports dinámicos
+ * Un solo botón: navegador = input file, app = menú cámara/galería
  */
 (function() {
 
@@ -8,129 +8,67 @@ const isNativeApp = () => {
     return typeof Capacitor !== 'undefined' && Capacitor.isNativePlatform();
 };
 
-// Esperar a que Capacitor esté listo
-async function waitForCapacitor() {
-    return new Promise((resolve) => {
-        if (typeof Capacitor !== 'undefined' && Capacitor.Plugins) {
-            resolve();
+// ==================== BOTÓN RETROCEDER ====================
+if (isNativeApp()) {
+    Capacitor.Plugins.App.addListener('backButton', ({ canGoBack }) => {
+        const overlays = document.querySelectorAll('[style*="z-index:9999"], [style*="z-index:99999"], .modal-overlay-aw');
+        if (overlays.length > 0) {
+            overlays[overlays.length-1].remove();
+            document.body.style.overflow = '';
             return;
         }
-        document.addEventListener('deviceready', resolve, { once: true });
-        document.addEventListener('DOMContentLoaded', () => {
-            // Timeout de seguridad
-            setTimeout(resolve, 1000);
-        }, { once: true });
+        const sidebar = document.getElementById('sidebar');
+        if (sidebar && sidebar.classList.contains('open')) {
+            sidebar.classList.remove('open');
+            document.getElementById('sidebarOverlay')?.classList.remove('visible');
+            document.body.style.overflow = '';
+            return;
+        }
+        if (!canGoBack) {
+            if (confirm('¿Deseas salir de AquaTrack?')) Capacitor.Plugins.App.exitApp();
+        } else {
+            window.history.back();
+        }
     });
 }
 
-// ==================== PERMISOS ====================
-async function checkAndRequestCameraPermission() {
-    if (!isNativeApp()) return true;
-    try {
-        const Camera = Capacitor.Plugins.Camera;
-        if (!Camera) {
-            console.error('Plugin Camera no disponible');
-            return false;
-        }
-        const status = await Camera.checkPermissions();
-        console.log('📷 Estado permiso:', status.camera);
-        if (status.camera === 'granted') return true;
-        const request = await Camera.requestPermissions();
-        console.log('📷 Solicitado:', request.camera);
-        return request.camera === 'granted';
-    } catch (e) {
-        console.error('Error permisos:', e);
-        return false;
-    }
-}
-
-// ==================== BOTÓN RETROCEDER ====================
-document.addEventListener('DOMContentLoaded', async () => {
-    if (!isNativeApp()) return;
-    await waitForCapacitor();
-    try {
-        Capacitor.Plugins.App.addListener('backButton', ({ canGoBack }) => {
-            const overlays = document.querySelectorAll('[style*="z-index:9999"], [style*="z-index:99999"], .modal-overlay-aw');
-            if (overlays.length > 0) {
-                overlays[overlays.length-1].remove();
-                document.body.style.overflow = '';
-                return;
-            }
-            const sidebar = document.getElementById('sidebar');
-            if (sidebar && sidebar.classList.contains('open')) {
-                sidebar.classList.remove('open');
-                document.getElementById('sidebarOverlay')?.classList.remove('visible');
-                document.body.style.overflow = '';
-                return;
-            }
-            if (!canGoBack) {
-                if (confirm('¿Deseas salir de AquaTrack?')) Capacitor.Plugins.App.exitApp();
-            } else {
-                window.history.back();
-            }
-        });
-    } catch (e) {
-        console.log('backButton no disponible:', e.message);
-    }
-});
-
 // ==================== TOMAR FOTO ====================
 async function takePhoto() {
-    if (!isNativeApp()) return null;
     const Camera = Capacitor.Plugins.Camera;
-    if (!Camera) {
-        console.error('❌ Camera plugin no encontrado');
-        alert('Cámara no disponible. Verifica los permisos.');
-        return null;
+    const status = await Camera.checkPermissions();
+    if (status.camera !== 'granted') {
+        const req = await Camera.requestPermissions();
+        if (req.camera !== 'granted') {
+            toast.warning('Permiso de cámara denegado');
+            return null;
+        }
     }
-    
-    const hasPermission = await checkAndRequestCameraPermission();
-    if (!hasPermission) {
-        alert('Permiso de cámara denegado');
-        return null;
-    }
-    
     try {
         const image = await Camera.getPhoto({
-            quality: 90,
-            allowEditing: true,
-            resultType: 'base64',
-            source: 'CAMERA',
-            width: 800,
-            height: 800,
-            correctOrientation: true
+            quality: 90, allowEditing: true,
+            resultType: 'base64', source: 'CAMERA',
+            width: 800, height: 800, correctOrientation: true
         });
         return base64ToFile(image.base64String, image.format);
-    } catch (e) {
-        console.error('Error cámara:', e);
-        return null;
-    }
+    } catch (e) { return null; }
 }
 
 // ==================== GALERÍA ====================
 async function pickFromGallery() {
-    if (!isNativeApp()) return null;
     const Camera = Capacitor.Plugins.Camera;
-    if (!Camera) return null;
-    
-    const hasPermission = await checkAndRequestCameraPermission();
-    if (!hasPermission) return null;
-    
+    const status = await Camera.checkPermissions();
+    if (status.camera !== 'granted') {
+        const req = await Camera.requestPermissions();
+        if (req.camera !== 'granted') return null;
+    }
     try {
         const image = await Camera.getPhoto({
-            quality: 90,
-            allowEditing: true,
-            resultType: 'base64',
-            source: 'PHOTOS',
-            width: 800,
-            height: 800,
-            correctOrientation: true
+            quality: 90, allowEditing: true,
+            resultType: 'base64', source: 'PHOTOS',
+            width: 800, height: 800, correctOrientation: true
         });
         return base64ToFile(image.base64String, image.format);
-    } catch (e) {
-        console.error('Error galería:', e);
-        return null;
-    }
+    } catch (e) { return null; }
 }
 
 function base64ToFile(base64String, format) {
@@ -153,26 +91,20 @@ function showPreviewForInput(inputId, file) {
         preview.style.cssText = 'display:flex;align-items:center;gap:10px;margin-top:10px;padding:10px;background:#f0fdf4;border-radius:10px;border:1px solid #86efac;';
         preview.innerHTML = `
             <img src="${e.target.result}" style="width:60px;height:60px;border-radius:10px;object-fit:cover;border:2px solid #10b981;">
-            <div style="flex:1;">
-                <div style="font-size:12px;color:#065f46;font-weight:600;">✅ Imagen seleccionada</div>
-                <div style="font-size:10px;color:#64748b;">${(file.size/1024).toFixed(1)} KB</div>
-            </div>
-            <button onclick="this.parentElement.remove();document.getElementById('${inputId}').value='';" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:18px;flex-shrink:0;">×</button>
-        `;
+            <div style="flex:1;"><div style="font-size:12px;color:#065f46;font-weight:600;">✅ Imagen lista</div><div style="font-size:10px;color:#64748b;">${(file.size/1024).toFixed(1)} KB</div></div>
+            <button onclick="this.parentElement.remove();document.getElementById('${inputId}').value='';" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:18px;">×</button>`;
         const input = document.getElementById(inputId);
-        if (input && input.parentNode) {
-            input.parentNode.appendChild(preview);
-        }
+        if (input && input.parentNode) input.parentNode.appendChild(preview);
     };
     reader.readAsDataURL(file);
 }
 
-// ==================== PICK IMAGE ====================
+// ==================== BOTÓN ÚNICO - CÁMARA/GALERÍA/ARCHIVO ====================
 async function pickImageForInput(inputId) {
     const input = document.getElementById(inputId);
     if (!input) return;
 
-    // NO ES APP NATIVA: abrir input file
+    // NAVEGADOR: abrir selector de archivos
     if (!isNativeApp()) {
         input.click();
         return;
@@ -182,12 +114,11 @@ async function pickImageForInput(inputId) {
     const action = await new Promise((resolve) => {
         const ov = document.createElement('div');
         ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99999;display:flex;align-items:flex-end;justify-content:center;';
-        ov.innerHTML = `<div style="background:white;border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:400px;">
-            <p style="text-align:center;font-weight:700;font-size:16px;margin-bottom:16px;">📷 Seleccionar imagen</p>
-            <button id="_cam" style="width:100%;padding:14px;border:none;background:#f8fafc;border-radius:12px;font-size:15px;font-weight:600;margin-bottom:8px;cursor:pointer;">📸 Cámara</button>
-            <button id="_gal" style="width:100%;padding:14px;border:none;background:#f8fafc;border-radius:12px;font-size:15px;font-weight:600;margin-bottom:12px;cursor:pointer;">🖼️ Galería</button>
-            <button id="_can" style="width:100%;padding:14px;border:none;background:white;border-radius:12px;font-size:15px;font-weight:600;color:#ef4444;cursor:pointer;">Cancelar</button>
-        </div>`;
+        ov.innerHTML = `<div style="background:white;border-radius:20px 20px 0 0;padding:24px;width:100%;max-width:400px;">
+            <p style="text-align:center;font-weight:700;font-size:16px;margin-bottom:20px;color:#0f172a;">📷 Seleccionar imagen</p>
+            <button id="_cam" style="width:100%;padding:15px;border:none;background:#eff6ff;color:#3b82f6;border-radius:12px;font-size:15px;font-weight:600;margin-bottom:10px;cursor:pointer;">📸 Tomar foto con cámara</button>
+            <button id="_gal" style="width:100%;padding:15px;border:none;background:#f0fdf4;color:#10b981;border-radius:12px;font-size:15px;font-weight:600;margin-bottom:10px;cursor:pointer;">🖼️ Elegir de galería</button>
+            <button id="_can" style="width:100%;padding:15px;border:none;background:#f1f5f9;color:#64748b;border-radius:12px;font-size:15px;font-weight:600;margin-top:4px;cursor:pointer;">Cancelar</button></div>`;
         document.body.appendChild(ov);
         ov.querySelector('#_cam').onclick = () => { ov.remove(); resolve('camera'); };
         ov.querySelector('#_gal').onclick = () => { ov.remove(); resolve('gallery'); };
@@ -203,12 +134,11 @@ async function pickImageForInput(inputId) {
     const dt = new DataTransfer();
     dt.items.add(file);
     input.files = dt.files;
-    
     showPreviewForInput(inputId, file);
-    
-    if (typeof toast !== 'undefined') toast.success('📷 Imagen lista para subir');
+    if (typeof toast !== 'undefined') toast.success('📷 Imagen lista');
 }
 
+// ==================== PREVIEW DESDE INPUT FILE ====================
 function showFilePreview(input) {
     const file = input.files[0];
     if (!file) return;
