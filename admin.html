@@ -36,6 +36,11 @@
         <span class="nav-label">Ventas</span>
         <span class="nav-badge" id="sidebarSaleCount">0</span>
       </a>
+      <a href="#inventory" class="nav-item" data-section="inventory">
+        <i data-lucide="package" class="nav-icon"></i>
+        <span class="nav-label">Inventario</span>
+        <span class="nav-badge" id="sidebarInventoryCount">0</span>
+      </a>
       <a href="#analytics" class="nav-item" data-section="analytics">
         <i data-lucide="trending-up" class="nav-icon"></i>
         <span class="nav-label">Estadísticas</span>
@@ -74,7 +79,7 @@
       
       <div class="topbar-search">
         <span class="search-icon"><i data-lucide="search"></i></span>
-        <input type="text" placeholder="Buscar ventas, usuarios..." id="globalSearch">
+        <input type="text" placeholder="Buscar ventas, usuarios, inventario..." id="globalSearch">
       </div>
 
       <div class="topbar-actions">
@@ -202,6 +207,103 @@
         </div>
       </section>
 
+      <!-- SECCIÓN: INVENTARIO -->
+      <section class="content-section" id="section-inventory">
+        <div class="section-header">
+          <h2>📦 Gestión de Inventario</h2>
+          <div class="section-actions">
+            <button class="btn btn-sm btn-primary" onclick="document.getElementById('formAddItem').style.display='block'">
+              <i data-lucide="plus" style="width:14px;height:14px;"></i> Agregar Item
+            </button>
+          </div>
+        </div>
+
+        <div class="stats-row" style="margin-bottom:16px;">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#dbeafe;color:#3b82f6;">📦</div>
+            <div class="stat-info">
+              <span class="stat-value" id="statTotalItems">0</span>
+              <span class="stat-label">Items Totales</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#fef3c7;color:#f59e0b;">⚠️</div>
+            <div class="stat-info">
+              <span class="stat-value" id="statLowStock">0</span>
+              <span class="stat-label">Stock Bajo</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" id="formAddItem" style="display:none;margin-bottom:16px;">
+          <h3 style="font-size:16px;font-weight:600;color:#0f172a;margin-bottom:14px;">Agregar Nuevo Item al Inventario</h3>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="form-group">
+              <label class="form-label">Nombre del Item *</label>
+              <input type="text" class="form-input" id="itemName" placeholder="Ej: Botella 500ml">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Categoría *</label>
+              <select class="form-select" id="itemCategory">
+                <option value="">Seleccionar categoría...</option>
+                <option value="botellas">Botellas</option>
+                <option value="bidones">Bidones</option>
+                <option value="maquinas">Máquinas y Equipos</option>
+                <option value="insumos">Insumos</option>
+                <option value="otros">Otros</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Cantidad Inicial</label>
+              <input type="number" class="form-input" id="itemQuantity" placeholder="0" min="0" value="0">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Stock Mínimo</label>
+              <input type="number" class="form-input" id="itemMinQuantity" value="5" min="0">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Unidad de Medida</label>
+              <input type="text" class="form-input" id="itemUnit" value="unidad" placeholder="unidad, litros, kg, etc.">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Descripción (opcional)</label>
+              <input type="text" class="form-input" id="itemDescription" placeholder="Detalles adicionales...">
+            </div>
+          </div>
+          <div class="form-group" style="margin-top:12px;">
+            <label class="form-label">📷 Foto del Item</label>
+            <input type="file" id="itemImage" accept="image/*" style="font-size:13px;font-family:inherit;">
+          </div>
+          <div style="display:flex;gap:10px;margin-top:16px;">
+            <button class="btn btn-outline" onclick="document.getElementById('formAddItem').style.display='none'">Cancelar</button>
+            <button class="btn btn-primary" onclick="addInventoryItem()">
+              <i data-lucide="save" style="width:14px;height:14px;"></i> Guardar Item
+            </button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Foto</th>
+                  <th>Item</th>
+                  <th>Categoría</th>
+                  <th>Stock</th>
+                  <th>Mínimo</th>
+                  <th>Descripción</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="inventoryTable">
+                <tr><td colspan="7"><div class="empty-state"><div class="loading-spinner"></div><p>Cargando inventario...</p></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
       <!-- SECCIÓN: ESTADÍSTICAS -->
       <section class="content-section" id="section-analytics">
         <div class="section-header">
@@ -262,6 +364,9 @@
   <button class="bottom-nav-item" data-section="sales">
     <i data-lucide="dollar-sign"></i><small>Ventas</small>
   </button>
+  <button class="bottom-nav-item" data-section="inventory">
+    <i data-lucide="package"></i><small>Inventario</small>
+  </button>
   <button class="bottom-nav-item" data-section="analytics">
     <i data-lucide="trending-up"></i><small>Stats</small>
   </button>
@@ -278,6 +383,7 @@
 <script src="js/modal.js"></script>
 <script src="js/roleGuard.js"></script>
 <script src="js/auth.js"></script>
+<script src="js/inventory.js"></script>
 <script src="js/admin.js"></script>
 </body>
 </html>

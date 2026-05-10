@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">AquaTrack DW</string>
+    <string name="title_activity_main">AquaTrack DW</string>
+    <string name="package_name">com.aquatrack.dw</string>
+    <string name="custom_url_scheme">com.aquatrack.dw</string>
+</resources>

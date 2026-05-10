@@ -465,3 +465,8 @@ tbody tr:last-child td { border-bottom: none; }
     font-size: 12px !important;
   }
 }
+.stock-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.stock-good{background:#d1fae5;color:#065f46}
+.stock-low{background:#fef3c7;color:#92400e}
+.stock-empty{background:#fee2e2;color:#991b1b}
+.btn-icon.add:hover{border-color:#86efac;color:#10b981;background:#f0fdf4}

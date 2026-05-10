@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#f8fafc">
+  <title>Admin - AquaTrack DW</title>
+  <link rel="shortcut icon" href="./assets/logo.png" type="image/x-icon">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+
+<div class="dashboard">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-icon"><i data-lucide="droplets"></i></span>
+      <div>
+        <h3>AquaTrack</h3>
+        <span>Admin Panel</span>
+      </div>
+    </div>
+    
+    <nav class="sidebar-nav">
+      <a href="#users" class="nav-item active" data-section="users">
+        <i data-lucide="users" class="nav-icon"></i>
+        <span class="nav-label">Usuarios</span>
+        <span class="nav-badge" id="sidebarUserCount">0</span>
+      </a>
+      <a href="#sales" class="nav-item" data-section="sales">
+        <i data-lucide="dollar-sign" class="nav-icon"></i>
+        <span class="nav-label">Ventas</span>
+        <span class="nav-badge" id="sidebarSaleCount">0</span>
+      </a>
+      <a href="#analytics" class="nav-item" data-section="analytics">
+        <i data-lucide="trending-up" class="nav-icon"></i>
+        <span class="nav-label">Estadísticas</span>
+      </a>
+      <a href="#settings" class="nav-item" data-section="settings">
+        <i data-lucide="settings" class="nav-icon"></i>
+        <span class="nav-label">Configuración</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-avatar" id="userAvatar">A</div>
+        <div class="user-info">
+          <span class="user-name" id="sidebarUserName">Admin</span>
+          <span class="user-email" id="sidebarUserEmail">admin@email.com</span>
+        </div>
+      </div>
+      <button class="btn-logout-sidebar" onclick="logout()">
+        <i data-lucide="log-out" style="width:14px;height:14px;"></i> Salir
+      </button>
+    </div>
+  </aside>
+
+  <!-- OVERLAY PARA MÓVIL -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="main-content">
+
+    <!-- HEADER SUPERIOR -->
+    <header class="topbar">
+      <button class="btn-menu" id="btnMenu" aria-label="Menú">
+        <span></span><span></span><span></span>
+      </button>
+      
+      <div class="topbar-search">
+        <span class="search-icon"><i data-lucide="search"></i></span>
+        <input type="text" placeholder="Buscar ventas, usuarios..." id="globalSearch">
+      </div>
+
+      <div class="topbar-actions">
+        <button class="btn-icon-header" onclick="toast.info('Notificaciones en desarrollo')" title="Notificaciones">
+          <i data-lucide="bell"></i>
+          <span class="notification-dot"></span>
+        </button>
+        <span class="badge badge-admin" id="userRoleDisplay">Admin</span>
+        <button class="btn-logout-top" onclick="logout()">Cerrar sesión</button>
+      </div>
+    </header>
+
+    <!-- STATS CARDS -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#dbeafe;color:#3b82f6;">
+          <i data-lucide="users"></i>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value" id="statUsers">0</span>
+          <span class="stat-label">Usuarios</span>
+        </div>
+        <div class="stat-trend up">↑ 12%</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#d1fae5;color:#10b981;">
+          <i data-lucide="dollar-sign"></i>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value" id="statSales">0</span>
+          <span class="stat-label">Ventas</span>
+        </div>
+        <div class="stat-trend up">↑ 8%</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#fef3c7;color:#f59e0b;">
+          <i data-lucide="package"></i>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value" id="statProducts">0</span>
+          <span class="stat-label">Productos</span>
+        </div>
+        <div class="stat-trend stable">→ Estable</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#fce7f3;color:#ec4899;">
+          <i data-lucide="banknote"></i>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value" id="statRevenue">$0</span>
+          <span class="stat-label">Ingresos</span>
+        </div>
+        <div class="stat-trend up">↑ 15%</div>
+      </div>
+    </div>
+
+    <!-- CONTENIDO POR SECCIONES -->
+    <div class="sections-container">
+
+      <!-- SECCIÓN: USUARIOS -->
+      <section class="content-section active" id="section-users">
+        <div class="section-header">
+          <h2>Gestión de Usuarios</h2>
+          <div class="section-actions">
+            <button class="btn btn-sm btn-outline" onclick="exportUsers()">
+              <i data-lucide="download" style="width:14px;height:14px;"></i> Exportar
+            </button>
+            <button class="btn btn-sm btn-primary" onclick="modal.alert('Función en desarrollo')">
+              <i data-lucide="plus" style="width:14px;height:14px;"></i> Agregar
+            </button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Usuario</th>
+                  <th>Email</th>
+                  <th>Rol</th>
+                  <th>Registro</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody id="usersTable">
+                <tr><td colspan="5"><div class="empty-state"><div class="loading-spinner"></div><p>Cargando usuarios...</p></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECCIÓN: VENTAS -->
+      <section class="content-section" id="section-sales">
+        <div class="section-header">
+          <h2>Todas las Ventas</h2>
+          <div class="section-actions">
+            <input type="date" class="form-input form-input-sm" id="filterDate" onchange="filtrarVentasAdmin()" style="width:auto;">
+            <button class="btn btn-sm btn-outline" onclick="exportSales()">
+              <i data-lucide="download" style="width:14px;height:14px;"></i> Exportar
+            </button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Producto</th>
+                  <th>Cant</th>
+                  <th>Precio</th>
+                  <th>Total</th>
+                  <th>Cliente</th>
+                  <th>Obs.</th>
+                  <th>Vendedor</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="salesTable">
+                <tr><td colspan="9"><div class="empty-state"><div class="loading-spinner"></div><p>Cargando ventas...</p></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECCIÓN: ESTADÍSTICAS -->
+      <section class="content-section" id="section-analytics">
+        <div class="section-header">
+          <h2>Estadísticas Globales</h2>
+          <select class="form-input form-input-sm" id="chartPeriod" onchange="loadSales()" style="width:auto;">
+            <option value="7">Últimos 7 días</option>
+            <option value="30" selected>Últimos 30 días</option>
+            <option value="90">Últimos 90 días</option>
+          </select>
+        </div>
+        <div class="charts-grid">
+          <div class="card">
+            <h3 style="font-size:14px;margin-bottom:16px;color:#64748b;">Ventas por Día</h3>
+            <div class="chart-container" style="min-height:300px;">
+              <canvas id="salesChart"></canvas>
+            </div>
+          </div>
+          <div class="card">
+            <h3 style="font-size:14px;margin-bottom:16px;color:#64748b;">Productos Más Vendidos</h3>
+            <div class="chart-container" style="min-height:300px;">
+              <canvas id="productsChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECCIÓN: CONFIGURACIÓN -->
+      <section class="content-section" id="section-settings">
+        <div class="section-header">
+          <h2>Configuración</h2>
+        </div>
+        <div class="card" style="max-width:500px;">
+          <div class="form-group">
+            <label class="form-label">Nombre de la Empresa</label>
+            <input type="text" class="form-input" value="AquaTrack DW" disabled>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email Administrador</label>
+            <input type="email" class="form-input" id="settingsEmail" disabled>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Versión</label>
+            <input type="text" class="form-input" value="2.0.0" disabled>
+          </div>
+          <button class="btn btn-primary" onclick="modal.alert('Configuración guardada', 'success')">Guardar Cambios</button>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<!-- BOTTOM NAV (MÓVIL) -->
+<nav class="bottom-nav" id="bottomNav">
+  <button class="bottom-nav-item active" data-section="users">
+    <i data-lucide="users"></i><small>Usuarios</small>
+  </button>
+  <button class="bottom-nav-item" data-section="sales">
+    <i data-lucide="dollar-sign"></i><small>Ventas</small>
+  </button>
+  <button class="bottom-nav-item" data-section="analytics">
+    <i data-lucide="trending-up"></i><small>Stats</small>
+  </button>
+  <button class="bottom-nav-item" data-section="settings">
+    <i data-lucide="settings"></i><small>Ajustes</small>
+  </button>
+</nav>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="js/config.js"></script>
+<script src="js/toast.js"></script>
+<script src="js/modal.js"></script>
+<script src="js/roleGuard.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>

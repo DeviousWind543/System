@@ -1,6 +1,6 @@
 /**
  * admin.js - Panel Admin AquaTrack DW
- * CRUD completo: Usuarios + Ventas con edición + Cliente + Observaciones
+ * CRUD completo: Usuarios + Ventas con edición + Cliente + Observaciones + Inventario
  * Protegido por roleGuard
  */
 (async function() {
@@ -89,6 +89,7 @@
     
     if (section === 'users') loadUsersTable();
     if (section === 'sales') loadSalesTable();
+    if (section === 'inventory') loadInventory();
     if (section === 'analytics') setTimeout(() => renderChartsFromCache(), 150);
   }
 
@@ -106,9 +107,10 @@
 
   async function loadAllData() {
     try {
-      const [usersResult, salesResult] = await Promise.all([
+      const [usersResult, salesResult, invResult] = await Promise.all([
         window.AquaTrack.db.from('profiles').select('*').order('created_at', { ascending: false }),
-        window.AquaTrack.db.from('sales').select('*').order('date', { ascending: false }).limit(500)
+        window.AquaTrack.db.from('sales').select('*').order('date', { ascending: false }).limit(500),
+        window.AquaTrack.db.from('inventory').select('*', { count: 'exact', head: true })
       ]);
 
       if (usersResult.error) throw usersResult.error;
@@ -128,6 +130,9 @@
       updateStatsCards();
       document.getElementById('sidebarUserCount').textContent = cachedUsers.length;
       document.getElementById('sidebarSaleCount').textContent = cachedSales.length;
+      if (document.getElementById('sidebarInventoryCount')) {
+        document.getElementById('sidebarInventoryCount').textContent = invResult.count || 0;
+      }
 
       if (currentSection === 'users') loadUsersTable();
       if (currentSection === 'sales') loadSalesTable();
@@ -306,7 +311,7 @@
             <option value="Bidón 5L" ${descStr.includes('5L')?'selected':''}>Bidón 5L</option>
             <option value="Bidón 1L" ${descStr.includes('1L')?'selected':''}>Bidón 1L</option>
             <option value="Botella 500ml" ${descStr.includes('500ml') && !descStr.includes('Pacas')?'selected':''}>Botella 500ml</option>
-            <option value="Pacas de botellas 500ml" ${descStr.includes('Pacas')?'selected':''}>Pacas de botellas 500ml</option>
+            <option value="Pacas de botellas 500ml" ${descStr.includes('Pacas')?'selected':''}>Pacas de botellas 500ml (24 unid.)</option>
           </select>
         </div>
         
@@ -365,6 +370,9 @@
 
       const loading = toast.loading('Actualizando...');
       try {
+                // Ajustar inventario según cambios
+        await adjustInventoryOnEdit(descStr, qty, nTamano, nCant);
+        
         const { error } = await window.AquaTrack.db.from('sales').update({
           quantity: nCant, price: nPrecio, total: nCant * nPrecio,
           date: nFecha ? new Date(nFecha + 'T12:00:00').toISOString() : new Date().toISOString(),
@@ -397,16 +405,22 @@
     });
   };
 
-  window.eliminarVentaAdmin = function(id) {
-    modal.delete('¿Eliminar esta venta?', async () => {
+window.eliminarVentaAdmin = function(id) {
+    const venta = cachedSales.find(s => s.id === id);
+    
+    modal.delete('¿Eliminar esta venta? Los items regresarán al inventario.', async () => {
       const loading = toast.loading('Eliminando...');
       try {
+        if (venta) {
+          await revertDiscountFromInventory(venta.description, venta.quantity);
+        }
+        
         const { error } = await window.AquaTrack.db.from('sales').delete().eq('id', id);
         if (error) throw error;
 
         cachedSales = cachedSales.filter(s => s.id !== id);
         loading.close();
-        toast.success('Venta eliminada');
+        toast.success('Venta eliminada - Items devueltos al inventario');
         updateStatsCards();
         loadSalesTable();
         document.getElementById('sidebarSaleCount').textContent = cachedSales.length;

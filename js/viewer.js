@@ -88,6 +88,7 @@
     }
     
     if (section === 'sales') loadSalesTable();
+    if (section === 'inventory') loadInventory();
     if (section === 'overview') setTimeout(() => renderCharts(), 150);
   }
 

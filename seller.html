@@ -15,248 +15,111 @@
 
 <div class="dashboard">
 
-  <!-- SIDEBAR -->
   <aside class="sidebar" id="sidebar">
-    <div class="sidebar-brand">
-      <span class="brand-icon"><i data-lucide="droplets"></i></span>
-      <div>
-        <h3>AquaTrack</h3>
-        <span>Panel Vendedor</span>
-      </div>
-    </div>
-    
+    <div class="sidebar-brand"><span class="brand-icon"><i data-lucide="droplets"></i></span><div><h3>AquaTrack</h3><span>Panel Vendedor</span></div></div>
     <nav class="sidebar-nav">
-      <a href="#sell" class="nav-item active" data-section="sell">
-        <i data-lucide="shopping-cart" class="nav-icon"></i>
-        <span class="nav-label">Nueva Venta</span>
-      </a>
-      <a href="#sales" class="nav-item" data-section="sales">
-        <i data-lucide="clipboard-list" class="nav-icon"></i>
-        <span class="nav-label">Mis Ventas</span>
-        <span class="nav-badge" id="sidebarSaleCount">0</span>
-      </a>
-      <a href="#analytics" class="nav-item" data-section="analytics">
-        <i data-lucide="trending-up" class="nav-icon"></i>
-        <span class="nav-label">Estadísticas</span>
-      </a>
+      <a href="#sell" class="nav-item active" data-section="sell"><i data-lucide="shopping-cart" class="nav-icon"></i><span class="nav-label">Nueva Venta</span></a>
+      <a href="#sales" class="nav-item" data-section="sales"><i data-lucide="clipboard-list" class="nav-icon"></i><span class="nav-label">Mis Ventas</span><span class="nav-badge" id="sidebarSaleCount">0</span></a>
+      <a href="#inventory" class="nav-item" data-section="inventory"><i data-lucide="package" class="nav-icon"></i><span class="nav-label">Inventario</span><span class="nav-badge" id="sidebarInventoryCount">0</span></a>
+      <a href="#analytics" class="nav-item" data-section="analytics"><i data-lucide="trending-up" class="nav-icon"></i><span class="nav-label">Estadísticas</span></a>
     </nav>
-
-    <div class="sidebar-footer">
-      <div class="user-card">
-        <div class="user-avatar" id="userAvatar">V</div>
-        <div class="user-info">
-          <span class="user-name" id="sidebarUserName">Vendedor</span>
-          <span class="user-email" id="sidebarUserEmail">vendedor@email.com</span>
-        </div>
-      </div>
-      <button class="btn-logout-sidebar" onclick="logout()">
-        <i data-lucide="log-out" style="width:14px;height:14px;"></i> Salir
-      </button>
-    </div>
+    <div class="sidebar-footer"><div class="user-card"><div class="user-avatar" id="userAvatar">V</div><div class="user-info"><span class="user-name" id="sidebarUserName">Vendedor</span><span class="user-email" id="sidebarUserEmail">vendedor@email.com</span></div></div><button class="btn-logout-sidebar" onclick="logout()"><i data-lucide="log-out" style="width:14px;height:14px;"></i> Salir</button></div>
   </aside>
 
-  <!-- OVERLAY MÓVIL -->
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-  <!-- CONTENIDO PRINCIPAL -->
   <main class="main-content">
-
-    <!-- TOPBAR -->
     <header class="topbar">
-      <button class="btn-menu" id="btnMenu" aria-label="Menú">
-        <span></span><span></span><span></span>
-      </button>
-      
-      <div class="topbar-brand-mobile">
-        <i data-lucide="droplets" style="width:18px;height:18px;"></i> AquaTrack
-      </div>
-
+      <button class="btn-menu" id="btnMenu"><span></span><span></span><span></span></button>
+      <div class="topbar-brand-mobile"><i data-lucide="droplets" style="width:18px;height:18px;"></i> AquaTrack</div>
       <div class="topbar-spacer"></div>
-
-      <div class="topbar-actions">
-        <span class="badge badge-seller" id="userRoleDisplay">Vendedor</span>
-        <button class="btn-logout-top" onclick="logout()">Cerrar sesión</button>
-      </div>
+      <div class="topbar-actions"><span class="badge badge-seller" id="userRoleDisplay">Vendedor</span><button class="btn-logout-top" onclick="logout()">Cerrar sesión</button></div>
     </header>
 
-    <!-- STATS CARDS -->
     <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-icon" style="background:#dbeafe;color:#3b82f6;">
-          <i data-lucide="package"></i>
-        </div>
-        <div class="stat-info">
-          <span class="stat-value" id="statTotalSales">0</span>
-          <span class="stat-label">Total Ventas</span>
-        </div>
-        <div class="stat-trend" id="trendSales">→ Hoy</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon" style="background:#d1fae5;color:#10b981;">
-          <i data-lucide="banknote"></i>
-        </div>
-        <div class="stat-info">
-          <span class="stat-value" id="statRevenue">$0</span>
-          <span class="stat-label">Ingresos Totales</span>
-        </div>
-        <div class="stat-trend" id="trendRevenue">→ Hoy</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon" style="background:#fef3c7;color:#f59e0b;">
-          <i data-lucide="target"></i>
-        </div>
-        <div class="stat-info">
-          <span class="stat-value" id="statToday">0</span>
-          <span class="stat-label">Ventas Hoy</span>
-        </div>
-        <div class="stat-trend" id="trendToday">→ Hoy</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon" style="background:#fce7f3;color:#ec4899;">
-          <i data-lucide="droplets"></i>
-        </div>
-        <div class="stat-info">
-          <span class="stat-value" id="statProducts">0</span>
-          <span class="stat-label">Productos</span>
-        </div>
-        <div class="stat-trend stable">→ Variedad</div>
-      </div>
+      <div class="stat-card"><div class="stat-icon" style="background:#dbeafe;color:#3b82f6;"><i data-lucide="package"></i></div><div class="stat-info"><span class="stat-value" id="statTotalSales">0</span><span class="stat-label">Total Ventas</span></div><div class="stat-trend" id="trendSales">→ Hoy</div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:#d1fae5;color:#10b981;"><i data-lucide="banknote"></i></div><div class="stat-info"><span class="stat-value" id="statRevenue">$0</span><span class="stat-label">Ingresos Totales</span></div><div class="stat-trend" id="trendRevenue">→ Hoy</div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:#fef3c7;color:#f59e0b;"><i data-lucide="target"></i></div><div class="stat-info"><span class="stat-value" id="statToday">0</span><span class="stat-label">Ventas Hoy</span></div><div class="stat-trend" id="trendToday">→ Hoy</div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:#fce7f3;color:#ec4899;"><i data-lucide="droplets"></i></div><div class="stat-info"><span class="stat-value" id="statProducts">0</span><span class="stat-label">Productos</span></div><div class="stat-trend stable">→ Variedad</div></div>
     </div>
 
-    <!-- SECCIONES -->
     <div class="sections-container">
 
-      <!-- SECCIÓN: NUEVA VENTA -->
+      <!-- NUEVA VENTA -->
       <section class="content-section active" id="section-sell">
-        <div class="section-header">
-          <h2>Registrar Nueva Venta</h2>
-        </div>
+        <div class="section-header"><h2>Registrar Nueva Venta</h2></div>
         <div class="card form-card">
-          <div class="form-group">
-            <label class="form-label">Producto</label>
-            <select class="form-select" id="tamanoBidon">
-              <option value="">Seleccionar producto...</option>
-              <option value="Bidón 20L">Bidón 20 Litros</option>
-              <option value="Bidón 12L">Bidón 12 Litros</option>
-              <option value="Bidón 5L">Bidón 5 Litros</option>
-              <option value="Bidón 1L">Bidón 1 Litro</option>
-              <option value="Botella 500ml">Botella 500 ml</option>
-              <option value="Pacas de botellas 500ml">Pacas de botellas 500ml</option>
-            </select>
+          <div class="form-group"><label class="form-label">Producto</label><select class="form-select" id="tamanoBidon" onchange="toggleCheckRetorno()"><option value="">Seleccionar producto...</option><option value="Bidón 20L">Bidón 20 Litros</option><option value="Bidón 12L">Bidón 12 Litros</option><option value="Bidón 5L">Bidón 5 Litros</option><option value="Bidón 1L">Bidón 1 Litro</option><option value="Botella 500ml">Botella 500 ml</option><option value="Pacas de botellas 500ml">Pacas de botellas 500ml (24 unid.)</option></select></div>
+          <div class="form-row"><div class="form-group"><label class="form-label">Cantidad</label><input type="number" class="form-input" id="cantidad" placeholder="0" min="1"></div><div class="form-group"><label class="form-label">Precio Unitario ($)</label><input type="number" class="form-input" id="precio" placeholder="0.00" min="0.01" step="0.01"></div></div>
+          <div class="form-group"><label class="form-label">Cliente</label><input type="text" class="form-input" id="cliente" placeholder="Nombre de a quién se vende"></div>
+          <div class="form-group"><label class="form-label">Observaciones</label><textarea class="form-input" id="observaciones" rows="2" placeholder="Notas adicionales..." style="resize:vertical;min-height:50px;"></textarea></div>
+          <div class="form-group"><label class="form-label">Fecha de Venta</label><input type="date" class="form-input" id="fechaVenta"></div>
+          <div class="form-group" id="divCheckRetorno" style="display:none;">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:8px 0;"><input type="checkbox" id="checkRetorno" style="width:18px;height:18px;cursor:pointer;"><span style="font-size:13px;font-weight:500;color:#475569;">¿Se retornaron los envases vacíos?</span></label>
+            <small style="color:#94a3b8;font-size:11px;margin-left:26px;">Los bidones retornados se reincorporan al inventario</small>
           </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">Cantidad</label>
-              <input type="number" class="form-input" id="cantidad" placeholder="0" min="1">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Precio Unitario ($)</label>
-              <input type="number" class="form-input" id="precio" placeholder="0.00" min="0.01" step="0.01">
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Cliente</label>
-            <input type="text" class="form-input" id="cliente" placeholder="Nombre de a quién se vende">
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Observaciones</label>
-            <textarea class="form-input" id="observaciones" rows="2" placeholder="Notas adicionales sobre la venta..." style="resize:vertical;min-height:50px;"></textarea>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Fecha de Venta</label>
-            <input type="date" class="form-input" id="fechaVenta">
-          </div>
-
-          <button class="btn btn-primary btn-lg" onclick="agregarVenta()" style="width:100%;">
-            <i data-lucide="plus" style="width:16px;height:16px;"></i> Registrar Venta
-          </button>
+          <button class="btn btn-primary btn-lg" onclick="agregarVenta()" style="width:100%;"><i data-lucide="plus" style="width:16px;height:16px;"></i> Registrar Venta</button>
         </div>
       </section>
 
-      <!-- SECCIÓN: MIS VENTAS -->
+      <!-- MIS VENTAS -->
       <section class="content-section" id="section-sales">
-        <div class="section-header">
-          <h2>Mis Ventas</h2>
-          <div class="section-actions section-actions-group">
-            <div class="search-filter-group">
-              <span class="search-icon-inline"><i data-lucide="search" style="width:14px;height:14px;"></i></span>
-              <input type="text" placeholder="Buscar en mis ventas..." id="salesSearch" class="form-input form-input-sm search-input-inline">
-              <input type="date" class="form-input form-input-sm" id="filterDate" onchange="filtrarPorFecha()">
-              <button class="btn btn-sm btn-outline" onclick="exportarVentas()">
-                <i data-lucide="download" style="width:14px;height:14px;"></i> Exportar
-              </button>
-            </div>
-          </div>
-        </div>
-        <div class="card">
-          <div class="table-wrapper">
-            <table>
-              <thead>
-                <tr>
-                  <th>Fecha</th>
-                  <th>Producto</th>
-                  <th>Cant</th>
-                  <th>Precio</th>
-                  <th>Total</th>
-                  <th>Cliente</th>
-                  <th>Obs.</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody id="salesTable">
-                <tr><td colspan="8"><div class="empty-state"><div class="loading-spinner"></div><p>Cargando ventas...</p></div></td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <div class="section-header"><h2>Mis Ventas</h2><div class="section-actions section-actions-group"><div class="search-filter-group"><span class="search-icon-inline"><i data-lucide="search" style="width:14px;height:14px;"></i></span><input type="text" placeholder="Buscar en mis ventas..." id="salesSearch" class="form-input form-input-sm search-input-inline"><input type="date" class="form-input form-input-sm" id="filterDate" onchange="filtrarPorFecha()"><button class="btn btn-sm btn-outline" onclick="exportarVentas()"><i data-lucide="download" style="width:14px;height:14px;"></i> Exportar</button></div></div></div>
+        <div class="card"><div class="table-wrapper"><table><thead><tr><th>Fecha</th><th>Producto</th><th>Cant</th><th>Precio</th><th>Total</th><th>Cliente</th><th>Obs.</th><th></th></tr></thead><tbody id="salesTable"><tr><td colspan="8"><div class="empty-state"><div class="loading-spinner"></div><p>Cargando ventas...</p></div></td></tr></tbody></table></div></div>
       </section>
 
-      <!-- SECCIÓN: ESTADÍSTICAS -->
+      <!-- INVENTARIO -->
+      <section class="content-section" id="section-inventory">
+        <div class="section-header"><h2>📦 Gestión de Inventario</h2><div class="section-actions"><button class="btn btn-sm btn-primary" onclick="document.getElementById('formAddItem').style.display='block'"><i data-lucide="plus" style="width:14px;height:14px;"></i> Agregar Item</button></div></div>
+        <div class="stats-row" style="margin-bottom:16px;"><div class="stat-card"><div class="stat-icon" style="background:#dbeafe;color:#3b82f6;">📦</div><div class="stat-info"><span class="stat-value" id="statTotalItems">0</span><span class="stat-label">Items Totales</span></div></div><div class="stat-card"><div class="stat-icon" style="background:#fef3c7;color:#f59e0b;">⚠️</div><div class="stat-info"><span class="stat-value" id="statLowStock">0</span><span class="stat-label">Stock Bajo</span></div></div></div>
+        <div class="card" id="formAddItem" style="display:none;margin-bottom:16px;">
+          <h3 style="font-size:16px;font-weight:600;color:#0f172a;margin-bottom:14px;">Agregar Nuevo Item</h3>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="form-group"><label class="form-label">Nombre *</label><input type="text" class="form-input" id="itemName" placeholder="Ej: Botella 500ml"></div>
+            <div class="form-group"><label class="form-label">Categoría *</label><select class="form-select" id="itemCategory"><option value="">Seleccionar...</option><option value="botellas">Botellas</option><option value="bidones">Bidones</option><option value="maquinas">Máquinas</option><option value="insumos">Insumos</option><option value="otros">Otros</option></select></div>
+            <div class="form-group"><label class="form-label">Cantidad</label><input type="number" class="form-input" id="itemQuantity" value="0" min="0"></div>
+            <div class="form-group"><label class="form-label">Stock Mínimo</label><input type="number" class="form-input" id="itemMinQuantity" value="5" min="0"></div>
+            <div class="form-group"><label class="form-label">Unidad</label><input type="text" class="form-input" id="itemUnit" value="unidad"></div>
+            <div class="form-group"><label class="form-label">Descripción</label><input type="text" class="form-input" id="itemDescription" placeholder="Opcional"></div>
+          </div>
+          <div class="form-group" style="margin-top:12px;"><label class="form-label">📷 Foto</label><input type="file" id="itemImage" accept="image/*" style="font-size:13px;"></div>
+          <div style="display:flex;gap:10px;margin-top:16px;"><button class="btn btn-outline" onclick="document.getElementById('formAddItem').style.display='none'">Cancelar</button><button class="btn btn-primary" onclick="addInventoryItem()"><i data-lucide="save" style="width:14px;height:14px;"></i> Guardar Item</button></div>
+        </div>
+        <div class="card"><div class="table-wrapper"><table><thead><tr><th>Foto</th><th>Item</th><th>Cat</th><th>Stock</th><th>Mín</th><th>Desc</th><th>Acc</th></tr></thead><tbody id="inventoryTable"><tr><td colspan="7"><div class="empty-state"><div class="loading-spinner"></div><p>Cargando inventario...</p></div></td></tr></tbody></table></div></div>
+      </section>
+
+      <!-- ESTADÍSTICAS -->
       <section class="content-section" id="section-analytics">
-        <div class="section-header">
-          <h2>Estadísticas</h2>
-          <select class="form-input form-input-sm" id="chartPeriod" onchange="actualizarGraficos()" style="width:auto;">
-            <option value="7">Últimos 7 días</option>
-            <option value="30" selected>Últimos 30 días</option>
-            <option value="90">Últimos 90 días</option>
-          </select>
-        </div>
-        <div class="charts-grid">
-          <div class="card">
-            <h3 style="font-size:14px;margin-bottom:16px;color:#64748b;">Ventas por Día</h3>
-            <div class="chart-container" style="min-height:300px;">
-              <canvas id="salesChart"></canvas>
-            </div>
-          </div>
-          <div class="card">
-            <h3 style="font-size:14px;margin-bottom:16px;color:#64748b;">Productos Vendidos</h3>
-            <div class="chart-container" style="min-height:300px;">
-              <canvas id="productsChart"></canvas>
-            </div>
-          </div>
-        </div>
+        <div class="section-header"><h2>Estadísticas</h2><select class="form-input form-input-sm" id="chartPeriod" onchange="actualizarGraficos()" style="width:auto;"><option value="7">7 días</option><option value="30" selected>30 días</option><option value="90">90 días</option></select></div>
+        <div class="charts-grid"><div class="card"><h3 style="font-size:14px;margin-bottom:16px;color:#64748b;">Ventas por Día</h3><div class="chart-container" style="min-height:300px;"><canvas id="salesChart"></canvas></div></div><div class="card"><h3 style="font-size:14px;margin-bottom:16px;color:#64748b;">Productos Vendidos</h3><div class="chart-container" style="min-height:300px;"><canvas id="productsChart"></canvas></div></div></div>
       </section>
 
     </div>
   </main>
 </div>
 
-<!-- BOTTOM NAV (MÓVIL) -->
 <nav class="bottom-nav" id="bottomNav">
-  <button class="bottom-nav-item active" data-section="sell">
-    <i data-lucide="shopping-cart"></i><small>Vender</small>
-  </button>
-  <button class="bottom-nav-item" data-section="sales">
-    <i data-lucide="clipboard-list"></i><small>Ventas</small>
-  </button>
-  <button class="bottom-nav-item" data-section="analytics">
-    <i data-lucide="trending-up"></i><small>Stats</small>
-  </button>
+  <button class="bottom-nav-item active" data-section="sell"><i data-lucide="shopping-cart"></i><small>Vender</small></button>
+  <button class="bottom-nav-item" data-section="sales"><i data-lucide="clipboard-list"></i><small>Ventas</small></button>
+  <button class="bottom-nav-item" data-section="inventory"><i data-lucide="package"></i><small>Inventario</small></button>
+  <button class="bottom-nav-item" data-section="analytics"><i data-lucide="trending-up"></i><small>Stats</small></button>
 </nav>
+
+<script>
+// Mostrar/ocultar checkbox de retorno según producto seleccionado
+function toggleCheckRetorno() {
+    const producto = document.getElementById('tamanoBidon').value;
+    const divRetorno = document.getElementById('divCheckRetorno');
+    const checkRetorno = document.getElementById('checkRetorno');
+    // Solo mostrar para bidones de 20L
+    if (producto === 'Bidón 20L') {
+        divRetorno.style.display = 'block';
+    } else {
+        divRetorno.style.display = 'none';
+        if (checkRetorno) checkRetorno.checked = false;
+    }
+}
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
@@ -266,6 +129,7 @@
 <script src="js/modal.js"></script>
 <script src="js/roleGuard.js"></script>
 <script src="js/auth.js"></script>
+<script src="js/inventory.js"></script>
 <script src="js/seller.js"></script>
 </body>
 </html>

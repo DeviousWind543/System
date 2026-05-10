@@ -102,6 +102,7 @@
     }
     
     if (section === 'sales') loadSalesTable();
+    if (section === 'inventory') loadInventory();
     if (section === 'analytics') setTimeout(() => renderCharts(), 150);
   }
 
@@ -170,7 +171,7 @@
     if (elProducts) elProducts.textContent = uniqueProducts.length;
   }
 
-  window.agregarVenta = async function() {
+window.agregarVenta = async function() {
     const tamano = document.getElementById('tamanoBidon');
     const cantidad = parseInt(document.getElementById('cantidad').value);
     const precio = parseFloat(document.getElementById('precio').value);
@@ -205,12 +206,23 @@
       loading.close();
       toast.success(`${cantidad} ${descripcion} registrado(s)`);
 
+      // Descontar del inventario (SIEMPRE)
+      await discountFromInventory(descripcion, cantidad);
+
+      // Verificar retorno de bidones 20L
+      const checkRetorno = document.getElementById('checkRetorno');
+      if (checkRetorno && checkRetorno.checked && tamano.value === 'Bidón 20L') {
+        await returnToInventory(descripcion, cantidad);
+        checkRetorno.checked = false;
+      }
+
       tamano.value = '';
       document.getElementById('cantidad').value = '';
       document.getElementById('precio').value = '';
       document.getElementById('cliente').value = '';
       document.getElementById('observaciones').value = '';
       document.getElementById('fechaVenta').value = getFechaLocal();
+      document.getElementById('divCheckRetorno').style.display = 'none';
 
       await loadAllData();
     } catch (e) {
@@ -219,7 +231,7 @@
     }
   };
 
-  window.editarVenta = function(id, qty, price, date, desc, cliente, observaciones) {
+window.editarVenta = function(id, qty, price, date, desc, cliente, observaciones) {
     const descStr = desc || '';
     const clienteStr = cliente || '';
     const obsStr = observaciones || '';
@@ -241,12 +253,12 @@
         <div style="margin-bottom:14px;">
           <label style="display:block;font-size:12px;font-weight:600;color:#475569;margin-bottom:5px;">Producto</label>
           <select id="editTamano" style="width:100%;padding:10px 13px;border:1px solid #e2e8f0;border-radius:10px;font-size:14px;font-family:inherit;background:#f8fafc;">
-            <option value="Bidón 20L" ${descStr.includes('20L')?'selected':''}>Bidón 20L</option>
-            <option value="Bidón 12L" ${descStr.includes('12L')?'selected':''}>Bidón 12L</option>
-            <option value="Bidón 5L" ${descStr.includes('5L')?'selected':''}>Bidón 5L</option>
-            <option value="Bidón 1L" ${descStr.includes('1L')?'selected':''}>Bidón 1L</option>
-            <option value="Botella 500ml" ${descStr.includes('500ml') && !descStr.includes('Pacas')?'selected':''}>Botella 500ml</option>
-            <option value="Pacas de botellas 500ml" ${descStr.includes('Pacas')?'selected':''}>Pacas de botellas 500ml</option>
+            <option value="Bidón 20L" ${descStr.includes('20L')?'selected':''}>Bidón 20 Litros</option>
+            <option value="Bidón 12L" ${descStr.includes('12L')?'selected':''}>Bidón 12 Litros</option>
+            <option value="Bidón 5L" ${descStr.includes('5L')?'selected':''}>Bidón 5 Litros</option>
+            <option value="Bidón 1L" ${descStr.includes('1L')?'selected':''}>Bidón 1 Litro</option>
+            <option value="Botella 500ml" ${descStr.includes('500ml') && !descStr.includes('Pacas')?'selected':''}>Botella 500 ml</option>
+            <option value="Pacas de botellas 500ml" ${descStr.includes('Pacas')?'selected':''}>Pacas de botellas 500ml (24 unid.)</option>
           </select>
         </div>
         
@@ -292,7 +304,7 @@
     overlay.addEventListener('click', (e) => { if (e.target === overlay) cerrar(); });
     document.getElementById('cancelEdit').addEventListener('click', cerrar);
 
-    document.getElementById('saveEdit').addEventListener('click', async () => {
+      document.getElementById('saveEdit').addEventListener('click', async () => {
       const nTamano = document.getElementById('editTamano').value;
       const nCant = parseInt(document.getElementById('editCantidad').value);
       const nPrecio = parseFloat(document.getElementById('editPrecio').value);
@@ -306,6 +318,9 @@
       const loading = toast.loading('Actualizando...');
       
       try {
+        // Ajustar inventario según cambios
+        await adjustInventoryOnEdit(descStr, qty, nTamano, nCant);
+
         const { error } = await window.AquaTrack.db.from('sales').update({
           quantity: nCant, 
           price: nPrecio, 
@@ -319,7 +334,7 @@
         if (error) throw error;
 
         loading.close();
-        toast.success('Venta actualizada');
+        toast.success('Venta actualizada - Inventario ajustado');
         cerrar();
         await loadAllData();
       } catch (e) {
@@ -329,17 +344,25 @@
     });
   };
 
-  window.eliminarVenta = function(id) {
-    modal.delete('¿Estás seguro de eliminar esta venta?', async () => {
+window.eliminarVenta = function(id) {
+    // Buscar la venta en caché para obtener sus datos
+    const venta = cachedSales.find(s => s.id === id);
+    
+    modal.delete('¿Estás seguro de eliminar esta venta? Los items regresarán al inventario.', async () => {
       const loading = toast.loading('Eliminando...');
       try {
+        // Revertir el descuento del inventario ANTES de eliminar
+        if (venta) {
+          await revertDiscountFromInventory(venta.description, venta.quantity);
+        }
+        
         const { error } = await window.AquaTrack.db.from('sales').delete().eq('id', id);
         if (error) throw error;
         
         cachedSales = cachedSales.filter(s => s.id !== id);
         
         loading.close();
-        toast.success('Venta eliminada');
+        toast.success('Venta eliminada - Items devueltos al inventario');
         updateStatsCards();
         loadSalesTable();
       } catch (e) {

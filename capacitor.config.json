@@ -1,0 +1,37 @@
+﻿{
+  "appId": "com.aquatrack.dw",
+  "appName": "AquaTrack DW",
+  "webDir": "www",
+  "bundledWebRuntime": false,
+  "server": {
+    "url": "https://deviouswind543.github.io/System",
+    "androidScheme": "https",
+    "cleartext": false,
+    "allowNavigation": [
+      "jglsbwrmqknsegvuiyes.supabase.co",
+      "fonts.googleapis.com",
+      "fonts.gstatic.com",
+      "cdn.jsdelivr.net",
+      "unpkg.com"
+    ]
+  },
+  "android": {
+    "allowMixedContent": false,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": false,
+    "adjustMarginsForEdgeToEdge": "force"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "launchAutoHide": true,
+      "backgroundColor": "#f8fafc",
+      "androidScaleType": "CENTER_CROP"
+    },
+    "StatusBar": {
+      "style": "LIGHT",
+      "backgroundColor": "#f8fafc",
+      "overlaysWebView": true
+    }
+  }
+}

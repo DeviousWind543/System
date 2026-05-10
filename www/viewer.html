@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#f8fafc">
+  <title>Visualizador - AquaTrack DW</title>
+  <link rel="shortcut icon" href="./assets/logo.png" type="image/x-icon">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/viewer.css">
+</head>
+<body>
+
+<div class="dashboard">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-icon"><i data-lucide="droplets"></i></span>
+      <div>
+        <h3>AquaTrack</h3>
+        <span>Visualizador</span>
+      </div>
+    </div>
+    
+    <nav class="sidebar-nav">
+      <a href="#overview" class="nav-item active" data-section="overview">
+        <i data-lucide="home" class="nav-icon"></i>
+        <span class="nav-label">Resumen</span>
+      </a>
+      <a href="#sales" class="nav-item" data-section="sales">
+        <i data-lucide="clipboard-list" class="nav-icon"></i>
+        <span class="nav-label">Ventas</span>
+        <span class="nav-badge" id="sidebarSaleCount">0</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-avatar" id="userAvatar">V</div>
+        <div class="user-info">
+          <span class="user-name" id="sidebarUserName">Visualizador</span>
+          <span class="user-email" id="sidebarUserEmail">viewer@email.com</span>
+        </div>
+      </div>
+      <button class="btn-logout-sidebar" onclick="logout()">
+        <i data-lucide="log-out" style="width:14px;height:14px;"></i> Salir
+      </button>
+    </div>
+  </aside>
+
+  <!-- OVERLAY MÓVIL -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="main-content">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <button class="btn-menu" id="btnMenu" aria-label="Menú">
+        <span></span><span></span><span></span>
+      </button>
+      
+      <div class="topbar-brand-mobile">
+        <i data-lucide="droplets" style="width:18px;height:18px;"></i> AquaTrack
+      </div>
+
+      <div class="topbar-spacer"></div>
+
+      <div class="topbar-actions">
+        <span class="badge badge-viewer" id="userRoleDisplay">Visualizador</span>
+        <button class="btn-logout-top" onclick="logout()">Cerrar sesión</button>
+      </div>
+    </header>
+
+    <!-- STATS CARDS -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#dbeafe;color:#3b82f6;">
+          <i data-lucide="clipboard-list"></i>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value" id="statTotalSales">0</span>
+          <span class="stat-label">Total Ventas</span>
+        </div>
+        <div class="stat-trend" id="trendTotal">→ General</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#d1fae5;color:#10b981;">
+          <i data-lucide="banknote"></i>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value" id="statRevenue">$0</span>
+          <span class="stat-label">Ingresos Totales</span>
+        </div>
+        <div class="stat-trend" id="trendRevenue">→ General</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#fef3c7;color:#f59e0b;">
+          <i data-lucide="target"></i>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value" id="statToday">0</span>
+          <span class="stat-label">Ventas Hoy</span>
+        </div>
+        <div class="stat-trend" id="trendToday">→ Hoy</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#fce7f3;color:#ec4899;">
+          <i data-lucide="droplets"></i>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value" id="statProducts">0</span>
+          <span class="stat-label">Productos</span>
+        </div>
+        <div class="stat-trend stable">→ Variedad</div>
+      </div>
+    </div>
+
+    <!-- SECCIONES -->
+    <div class="sections-container">
+
+      <!-- SECCIÓN: RESUMEN -->
+      <section class="content-section active" id="section-overview">
+        <div class="section-header">
+          <h2>Resumen General</h2>
+        </div>
+        <div class="overview-grid">
+          <div class="card">
+            <h3 style="font-size:14px;margin-bottom:16px;color:#64748b;">
+              <i data-lucide="trending-up" style="width:16px;height:16px;"></i> Ventas por Día
+            </h3>
+            <div class="chart-container" style="min-height:320px;">
+              <canvas id="overviewSalesChart"></canvas>
+            </div>
+          </div>
+          <div class="card">
+            <h3 style="font-size:14px;margin-bottom:16px;color:#64748b;">
+              <i data-lucide="pie-chart" style="width:16px;height:16px;"></i> Productos Más Vendidos
+            </h3>
+            <div class="chart-container" style="min-height:320px;">
+              <canvas id="overviewProductsChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECCIÓN: VENTAS -->
+      <section class="content-section" id="section-sales">
+        <div class="section-header">
+          <h2>Reporte de Ventas</h2>
+          <div class="section-actions section-actions-group">
+            <div class="search-filter-group">
+              <span class="search-icon-inline"><i data-lucide="search" style="width:14px;height:14px;"></i></span>
+              <input type="text" placeholder="Buscar en reporte..." id="salesSearch" class="form-input form-input-sm search-input-inline">
+              <input type="date" class="form-input form-input-sm" id="filterDate" onchange="filtrarPorFecha()">
+              <button class="btn btn-sm btn-outline" onclick="exportarVentas()">
+                <i data-lucide="download" style="width:14px;height:14px;"></i> Exportar
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Producto</th>
+                  <th>Cantidad</th>
+                  <th>Precio</th>
+                  <th>Total</th>
+                  <th>Cliente</th>
+                  <th>Vendedor</th>
+                  <th>Obs.</th>
+                </tr>
+              </thead>
+              <tbody id="salesTable">
+                <tr><td colspan="8"><div class="empty-state"><div class="loading-spinner"></div><p>Cargando ventas...</p></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<!-- BOTTOM NAV (MÓVIL) -->
+<nav class="bottom-nav" id="bottomNav">
+  <button class="bottom-nav-item active" data-section="overview">
+    <i data-lucide="home"></i><small>Resumen</small>
+  </button>
+  <button class="bottom-nav-item" data-section="sales">
+    <i data-lucide="clipboard-list"></i><small>Ventas</small>
+  </button>
+</nav>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="js/config.js"></script>
+<script src="js/toast.js"></script>
+<script src="js/modal.js"></script>
+<script src="js/roleGuard.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/viewer.js"></script>
+</body>
+</html>
