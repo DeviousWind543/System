@@ -19,7 +19,8 @@
     "allowMixedContent": false,
     "captureInput": true,
     "webContentsDebuggingEnabled": false,
-    "adjustMarginsForEdgeToEdge": "force"
+    "adjustMarginsForEdgeToEdge": "force",
+    "backgroundColor": "f8fafc"
   },
   "plugins": {
     "SplashScreen": {
@@ -29,9 +30,9 @@
       "androidScaleType": "CENTER_CROP"
     },
     "StatusBar": {
-      "style": "LIGHT",
+      "style": "DARK",
       "backgroundColor": "#f8fafc",
-      "overlaysWebView": true
+      "overlaysWebView": false
     }
   }
 }
