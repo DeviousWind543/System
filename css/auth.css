@@ -91,6 +91,12 @@ body::before {
   animation: float 3s ease-in-out infinite;
 }
 
+.brand-icon i {
+  width: 52px;
+  height: 52px;
+  color: #3b82f6;
+  stroke-width: 2.5;
+}
 @keyframes float {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-8px); }
@@ -171,6 +177,11 @@ body::before {
   z-index: 1;
 }
 
+.input-icon i {
+  width: 18px;
+  height: 18px;
+}
+
 input {
   width: 100%;
   padding: 13px 14px 13px 42px;
@@ -182,6 +193,11 @@ input {
   background: #f8fafc;
   color: #0f172a;
   outline: none;
+}
+
+input[type="password"],
+input[type="text"] {
+  padding-right: 45px;
 }
 
 input:focus {
@@ -197,6 +213,33 @@ input:focus + .input-icon,
 
 input::placeholder {
   color: #94a3b8;
+}
+
+/* Toggle de visibilidad de contraseña */
+.password-toggle {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  color: #94a3b8;
+  z-index: 2;
+  transition: color 0.2s;
+  line-height: 0;
+  border-radius: 8px;
+}
+
+.password-toggle:hover {
+  color: #64748b;
+  background: #f1f5f9;
+}
+
+.password-toggle i {
+  width: 18px;
+  height: 18px;
 }
 
 .btn-primary {
@@ -311,6 +354,11 @@ input::placeholder {
   
   .brand-icon {
     font-size: 44px;
+  }
+  
+  .brand-icon i {
+    width: 44px;
+    height: 44px;
   }
   
   input {

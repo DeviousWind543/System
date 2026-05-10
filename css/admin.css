@@ -73,6 +73,7 @@ body {
   width: 40px;
   height: 40px;
   background: linear-gradient(135deg, #3b82f6, #06b6d4);
+  justify-content: center; font-size: 18px; flex-shrink: 0; color: white;
   border-radius: 10px;
   display: flex;
   align-items: center;
@@ -1069,4 +1070,58 @@ tbody tr:last-child td { border-bottom: none; }
   .chart-container { min-height: 360px; }
   .card { padding: 22px; }
   .section-header h2 { font-size: 22px; }
+}
+/* Iconos SVG (Lucide) */
+.nav-icon, 
+.stat-icon i, 
+.brand-icon i,
+.input-icon i,
+.bottom-nav-item i {
+  width: 20px;
+  height: 20px;
+  stroke-width: 2;
+}
+
+.sidebar-brand .brand-icon i {
+  width: 24px;
+  height: 24px;
+  color: white;
+}
+
+.stat-icon i {
+  width: 22px;
+  height: 22px;
+}
+
+.bottom-nav-item i {
+  width: 20px;
+  height: 20px;
+}
+
+.nav-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.topbar-search .search-icon i {
+  width: 16px;
+  height: 16px;
+}
+
+.btn-icon-header i {
+  width: 18px;
+  height: 18px;
+}
+
+.btn-logout-sidebar i,
+.btn-logout-top i {
+  width: 14px;
+  height: 14px;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+
+.btn i {
+  vertical-align: middle;
 }

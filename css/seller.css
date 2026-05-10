@@ -131,6 +131,9 @@ body {
   display: flex; align-items: center; gap: 10px;
   position: sticky; top: 0; z-index: 50; flex-shrink: 0;
 }
+.topbar-spacer {
+  flex: 1;
+}
 .topbar-brand-mobile {
   display: none; font-weight: 700; font-size: 15px;
   color: var(--text); align-items: center; gap: 6px;
@@ -492,4 +495,59 @@ tbody tr:last-child td { border-bottom: none; }
   .chart-container { min-height: 360px; }
   .card { padding: 22px; }
   .section-header h2 { font-size: 22px; }
+}
+/* Grupo de búsqueda y filtro integrado */
+.search-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  background: #f8fafc;
+  padding: 6px 10px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.search-icon-inline {
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.search-input-inline {
+  border: none !important;
+  background: transparent !important;
+  padding: 8px 0 !important;
+  min-width: 160px;
+  flex: 1;
+  font-size: 13px !important;
+  outline: none;
+  box-shadow: none !important;
+}
+
+.search-input-inline::placeholder {
+  color: #94a3b8;
+}
+
+.search-input-inline:focus {
+  outline: none;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.section-actions-group {
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .search-filter-group {
+    width: 100%;
+    padding: 8px;
+  }
+  
+  .search-input-inline {
+    min-width: 120px;
+    font-size: 12px !important;
+  }
 }

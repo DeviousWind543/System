@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#f8fafc">
   <title>Vendedor - AquaTrack DW</title>
   <link rel="shortcut icon" href="./assets/logo.png" type="image/x-icon">
@@ -18,7 +18,7 @@
   <!-- SIDEBAR -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-brand">
-      <span class="brand-icon">💧</span>
+      <span class="brand-icon"><i data-lucide="droplets"></i></span>
       <div>
         <h3>AquaTrack</h3>
         <span>Panel Vendedor</span>
@@ -27,16 +27,16 @@
     
     <nav class="sidebar-nav">
       <a href="#sell" class="nav-item active" data-section="sell">
-        <span class="nav-icon">🛒</span>
+        <i data-lucide="shopping-cart" class="nav-icon"></i>
         <span class="nav-label">Nueva Venta</span>
       </a>
       <a href="#sales" class="nav-item" data-section="sales">
-        <span class="nav-icon">📋</span>
+        <i data-lucide="clipboard-list" class="nav-icon"></i>
         <span class="nav-label">Mis Ventas</span>
         <span class="nav-badge" id="sidebarSaleCount">0</span>
       </a>
       <a href="#analytics" class="nav-item" data-section="analytics">
-        <span class="nav-icon">📈</span>
+        <i data-lucide="trending-up" class="nav-icon"></i>
         <span class="nav-label">Estadísticas</span>
       </a>
     </nav>
@@ -50,7 +50,7 @@
         </div>
       </div>
       <button class="btn-logout-sidebar" onclick="logout()">
-        <span>🚪</span> Salir
+        <i data-lucide="log-out" style="width:14px;height:14px;"></i> Salir
       </button>
     </div>
   </aside>
@@ -68,13 +68,10 @@
       </button>
       
       <div class="topbar-brand-mobile">
-        <span>💧</span> AquaTrack
+        <i data-lucide="droplets" style="width:18px;height:18px;"></i> AquaTrack
       </div>
 
-      <div class="topbar-search">
-        <span class="search-icon">🔍</span>
-        <input type="text" placeholder="Buscar ventas..." id="globalSearch">
-      </div>
+      <div class="topbar-spacer"></div>
 
       <div class="topbar-actions">
         <span class="badge badge-seller" id="userRoleDisplay">Vendedor</span>
@@ -85,7 +82,9 @@
     <!-- STATS CARDS -->
     <div class="stats-row">
       <div class="stat-card">
-        <div class="stat-icon" style="background:#dbeafe;color:#3b82f6;">📦</div>
+        <div class="stat-icon" style="background:#dbeafe;color:#3b82f6;">
+          <i data-lucide="package"></i>
+        </div>
         <div class="stat-info">
           <span class="stat-value" id="statTotalSales">0</span>
           <span class="stat-label">Total Ventas</span>
@@ -93,7 +92,9 @@
         <div class="stat-trend" id="trendSales">→ Hoy</div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon" style="background:#d1fae5;color:#10b981;">💵</div>
+        <div class="stat-icon" style="background:#d1fae5;color:#10b981;">
+          <i data-lucide="banknote"></i>
+        </div>
         <div class="stat-info">
           <span class="stat-value" id="statRevenue">$0</span>
           <span class="stat-label">Ingresos Totales</span>
@@ -101,7 +102,9 @@
         <div class="stat-trend" id="trendRevenue">→ Hoy</div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon" style="background:#fef3c7;color:#f59e0b;">🎯</div>
+        <div class="stat-icon" style="background:#fef3c7;color:#f59e0b;">
+          <i data-lucide="target"></i>
+        </div>
         <div class="stat-info">
           <span class="stat-value" id="statToday">0</span>
           <span class="stat-label">Ventas Hoy</span>
@@ -109,7 +112,9 @@
         <div class="stat-trend" id="trendToday">→ Hoy</div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon" style="background:#fce7f3;color:#ec4899;">💧</div>
+        <div class="stat-icon" style="background:#fce7f3;color:#ec4899;">
+          <i data-lucide="droplets"></i>
+        </div>
         <div class="stat-info">
           <span class="stat-value" id="statProducts">0</span>
           <span class="stat-label">Productos</span>
@@ -124,18 +129,19 @@
       <!-- SECCIÓN: NUEVA VENTA -->
       <section class="content-section active" id="section-sell">
         <div class="section-header">
-          <h2>🛒 Registrar Nueva Venta</h2>
+          <h2>Registrar Nueva Venta</h2>
         </div>
         <div class="card form-card">
           <div class="form-group">
             <label class="form-label">Producto</label>
             <select class="form-select" id="tamanoBidon">
-              <option value="">Seleccionar tamaño...</option>
-              <option value="Bidón 20L">💧 Bidón 20 Litros</option>
-              <option value="Bidón 12L">💧 Bidón 12 Litros</option>
-              <option value="Bidón 5L">💧 Bidón 5 Litros</option>
-              <option value="Bidón 1L">💧 Bidón 1 Litro</option>
-              <option value="Botella 500ml">🧴 Botella 500 ml</option>
+              <option value="">Seleccionar producto...</option>
+              <option value="Bidón 20L">Bidón 20 Litros</option>
+              <option value="Bidón 12L">Bidón 12 Litros</option>
+              <option value="Bidón 5L">Bidón 5 Litros</option>
+              <option value="Bidón 1L">Bidón 1 Litro</option>
+              <option value="Botella 500ml">Botella 500 ml</option>
+              <option value="Pacas de botellas 500ml">Pacas de botellas 500ml</option>
             </select>
           </div>
 
@@ -151,12 +157,22 @@
           </div>
 
           <div class="form-group">
+            <label class="form-label">Cliente</label>
+            <input type="text" class="form-input" id="cliente" placeholder="Nombre de a quién se vende">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Observaciones</label>
+            <textarea class="form-input" id="observaciones" rows="2" placeholder="Notas adicionales sobre la venta..." style="resize:vertical;min-height:50px;"></textarea>
+          </div>
+
+          <div class="form-group">
             <label class="form-label">Fecha de Venta</label>
             <input type="date" class="form-input" id="fechaVenta">
           </div>
 
-          <button class="btn btn-primary btn-lg" onclick="agregarVenta()">
-            📝 Registrar Venta
+          <button class="btn btn-primary btn-lg" onclick="agregarVenta()" style="width:100%;">
+            <i data-lucide="plus" style="width:16px;height:16px;"></i> Registrar Venta
           </button>
         </div>
       </section>
@@ -164,10 +180,16 @@
       <!-- SECCIÓN: MIS VENTAS -->
       <section class="content-section" id="section-sales">
         <div class="section-header">
-          <h2>📋 Mis Ventas</h2>
-          <div class="section-actions">
-            <input type="date" class="form-input form-input-sm" id="filterDate" onchange="filtrarPorFecha()" style="width:auto;">
-            <button class="btn btn-sm btn-outline" onclick="exportarVentas()">📥 Exportar</button>
+          <h2>Mis Ventas</h2>
+          <div class="section-actions section-actions-group">
+            <div class="search-filter-group">
+              <span class="search-icon-inline"><i data-lucide="search" style="width:14px;height:14px;"></i></span>
+              <input type="text" placeholder="Buscar en mis ventas..." id="salesSearch" class="form-input form-input-sm search-input-inline">
+              <input type="date" class="form-input form-input-sm" id="filterDate" onchange="filtrarPorFecha()">
+              <button class="btn btn-sm btn-outline" onclick="exportarVentas()">
+                <i data-lucide="download" style="width:14px;height:14px;"></i> Exportar
+              </button>
+            </div>
           </div>
         </div>
         <div class="card">
@@ -180,11 +202,13 @@
                   <th>Cant</th>
                   <th>Precio</th>
                   <th>Total</th>
+                  <th>Cliente</th>
+                  <th>Obs.</th>
                   <th></th>
                 </tr>
               </thead>
               <tbody id="salesTable">
-                <tr><td colspan="6"><div class="empty-state"><div class="loading-spinner"></div><p>Cargando ventas...</p></div></td></tr>
+                <tr><td colspan="8"><div class="empty-state"><div class="loading-spinner"></div><p>Cargando ventas...</p></div></td></tr>
               </tbody>
             </table>
           </div>
@@ -194,7 +218,7 @@
       <!-- SECCIÓN: ESTADÍSTICAS -->
       <section class="content-section" id="section-analytics">
         <div class="section-header">
-          <h2>📈 Estadísticas</h2>
+          <h2>Estadísticas</h2>
           <select class="form-input form-input-sm" id="chartPeriod" onchange="actualizarGraficos()" style="width:auto;">
             <option value="7">Últimos 7 días</option>
             <option value="30" selected>Últimos 30 días</option>
@@ -224,21 +248,23 @@
 <!-- BOTTOM NAV (MÓVIL) -->
 <nav class="bottom-nav" id="bottomNav">
   <button class="bottom-nav-item active" data-section="sell">
-    <span>🛒</span><small>Vender</small>
+    <i data-lucide="shopping-cart"></i><small>Vender</small>
   </button>
   <button class="bottom-nav-item" data-section="sales">
-    <span>📋</span><small>Ventas</small>
+    <i data-lucide="clipboard-list"></i><small>Ventas</small>
   </button>
   <button class="bottom-nav-item" data-section="analytics">
-    <span>📈</span><small>Stats</small>
+    <i data-lucide="trending-up"></i><small>Stats</small>
   </button>
 </nav>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
 <script src="js/config.js"></script>
 <script src="js/toast.js"></script>
 <script src="js/modal.js"></script>
+<script src="js/roleGuard.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/seller.js"></script>
 </body>

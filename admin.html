@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#f8fafc">
   <title>Admin - AquaTrack DW</title>
   <link rel="shortcut icon" href="./assets/logo.png" type="image/x-icon">
@@ -18,7 +18,7 @@
   <!-- SIDEBAR -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-brand">
-      <span class="brand-icon">💧</span>
+      <span class="brand-icon"><i data-lucide="droplets"></i></span>
       <div>
         <h3>AquaTrack</h3>
         <span>Admin Panel</span>
@@ -27,21 +27,21 @@
     
     <nav class="sidebar-nav">
       <a href="#users" class="nav-item active" data-section="users">
-        <span class="nav-icon">👥</span>
+        <i data-lucide="users" class="nav-icon"></i>
         <span class="nav-label">Usuarios</span>
         <span class="nav-badge" id="sidebarUserCount">0</span>
       </a>
       <a href="#sales" class="nav-item" data-section="sales">
-        <span class="nav-icon">💰</span>
+        <i data-lucide="dollar-sign" class="nav-icon"></i>
         <span class="nav-label">Ventas</span>
         <span class="nav-badge" id="sidebarSaleCount">0</span>
       </a>
       <a href="#analytics" class="nav-item" data-section="analytics">
-        <span class="nav-icon">📈</span>
+        <i data-lucide="trending-up" class="nav-icon"></i>
         <span class="nav-label">Estadísticas</span>
       </a>
       <a href="#settings" class="nav-item" data-section="settings">
-        <span class="nav-icon">⚙️</span>
+        <i data-lucide="settings" class="nav-icon"></i>
         <span class="nav-label">Configuración</span>
       </a>
     </nav>
@@ -55,7 +55,7 @@
         </div>
       </div>
       <button class="btn-logout-sidebar" onclick="logout()">
-        <span>🚪</span> Salir
+        <i data-lucide="log-out" style="width:14px;height:14px;"></i> Salir
       </button>
     </div>
   </aside>
@@ -73,13 +73,13 @@
       </button>
       
       <div class="topbar-search">
-        <span class="search-icon">🔍</span>
+        <span class="search-icon"><i data-lucide="search"></i></span>
         <input type="text" placeholder="Buscar ventas, usuarios..." id="globalSearch">
       </div>
 
       <div class="topbar-actions">
         <button class="btn-icon-header" onclick="toast.info('Notificaciones en desarrollo')" title="Notificaciones">
-          🔔
+          <i data-lucide="bell"></i>
           <span class="notification-dot"></span>
         </button>
         <span class="badge badge-admin" id="userRoleDisplay">Admin</span>
@@ -90,7 +90,9 @@
     <!-- STATS CARDS -->
     <div class="stats-row">
       <div class="stat-card">
-        <div class="stat-icon" style="background:#dbeafe;color:#3b82f6;">👥</div>
+        <div class="stat-icon" style="background:#dbeafe;color:#3b82f6;">
+          <i data-lucide="users"></i>
+        </div>
         <div class="stat-info">
           <span class="stat-value" id="statUsers">0</span>
           <span class="stat-label">Usuarios</span>
@@ -98,7 +100,9 @@
         <div class="stat-trend up">↑ 12%</div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon" style="background:#d1fae5;color:#10b981;">💰</div>
+        <div class="stat-icon" style="background:#d1fae5;color:#10b981;">
+          <i data-lucide="dollar-sign"></i>
+        </div>
         <div class="stat-info">
           <span class="stat-value" id="statSales">0</span>
           <span class="stat-label">Ventas</span>
@@ -106,7 +110,9 @@
         <div class="stat-trend up">↑ 8%</div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon" style="background:#fef3c7;color:#f59e0b;">📦</div>
+        <div class="stat-icon" style="background:#fef3c7;color:#f59e0b;">
+          <i data-lucide="package"></i>
+        </div>
         <div class="stat-info">
           <span class="stat-value" id="statProducts">0</span>
           <span class="stat-label">Productos</span>
@@ -114,7 +120,9 @@
         <div class="stat-trend stable">→ Estable</div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon" style="background:#fce7f3;color:#ec4899;">💵</div>
+        <div class="stat-icon" style="background:#fce7f3;color:#ec4899;">
+          <i data-lucide="banknote"></i>
+        </div>
         <div class="stat-info">
           <span class="stat-value" id="statRevenue">$0</span>
           <span class="stat-label">Ingresos</span>
@@ -131,8 +139,12 @@
         <div class="section-header">
           <h2>Gestión de Usuarios</h2>
           <div class="section-actions">
-            <button class="btn btn-sm btn-outline" onclick="exportUsers()">📥 Exportar</button>
-            <button class="btn btn-sm btn-primary" onclick="modal.alert('Función en desarrollo')">+ Agregar</button>
+            <button class="btn btn-sm btn-outline" onclick="exportUsers()">
+              <i data-lucide="download" style="width:14px;height:14px;"></i> Exportar
+            </button>
+            <button class="btn btn-sm btn-primary" onclick="modal.alert('Función en desarrollo')">
+              <i data-lucide="plus" style="width:14px;height:14px;"></i> Agregar
+            </button>
           </div>
         </div>
         <div class="card">
@@ -161,7 +173,9 @@
           <h2>Todas las Ventas</h2>
           <div class="section-actions">
             <input type="date" class="form-input form-input-sm" id="filterDate" onchange="filtrarVentasAdmin()" style="width:auto;">
-            <button class="btn btn-sm btn-outline" onclick="exportSales()">📥 Exportar</button>
+            <button class="btn btn-sm btn-outline" onclick="exportSales()">
+              <i data-lucide="download" style="width:14px;height:14px;"></i> Exportar
+            </button>
           </div>
         </div>
         <div class="card">
@@ -174,12 +188,14 @@
                   <th>Cant</th>
                   <th>Precio</th>
                   <th>Total</th>
+                  <th>Cliente</th>
+                  <th>Obs.</th>
                   <th>Vendedor</th>
                   <th></th>
                 </tr>
               </thead>
               <tbody id="salesTable">
-                <tr><td colspan="7"><div class="empty-state"><div class="loading-spinner"></div><p>Cargando ventas...</p></div></td></tr>
+                <tr><td colspan="9"><div class="empty-state"><div class="loading-spinner"></div><p>Cargando ventas...</p></div></td></tr>
               </tbody>
             </table>
           </div>
@@ -241,24 +257,26 @@
 <!-- BOTTOM NAV (MÓVIL) -->
 <nav class="bottom-nav" id="bottomNav">
   <button class="bottom-nav-item active" data-section="users">
-    <span>👥</span><small>Usuarios</small>
+    <i data-lucide="users"></i><small>Usuarios</small>
   </button>
   <button class="bottom-nav-item" data-section="sales">
-    <span>💰</span><small>Ventas</small>
+    <i data-lucide="dollar-sign"></i><small>Ventas</small>
   </button>
   <button class="bottom-nav-item" data-section="analytics">
-    <span>📈</span><small>Stats</small>
+    <i data-lucide="trending-up"></i><small>Stats</small>
   </button>
   <button class="bottom-nav-item" data-section="settings">
-    <span>⚙️</span><small>Ajustes</small>
+    <i data-lucide="settings"></i><small>Ajustes</small>
   </button>
 </nav>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
 <script src="js/config.js"></script>
 <script src="js/toast.js"></script>
 <script src="js/modal.js"></script>
+<script src="js/roleGuard.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/admin.js"></script>
 </body>

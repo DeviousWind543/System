@@ -1,17 +1,16 @@
 /**
  * admin.js - Panel Admin AquaTrack DW
- * CRUD completo: Usuarios + Ventas con edición
+ * CRUD completo: Usuarios + Ventas con edición + Cliente + Observaciones
+ * Protegido por roleGuard
  */
 (async function() {
   'use strict';
 
-  // ==================== VERIFICAR AUTENTICACIÓN ====================
-  const { data: { user } } = await window.AquaTrack.db.auth.getUser();
-  if (!user) { location.href = 'index.html'; return; }
+  const user = await verifyPanelAccess(['admin']);
+  if (!user) return;
 
   console.log('✅ Admin autenticado:', user.email);
 
-  // ==================== OBTENER DATOS DEL PERFIL ====================
   let userName = user.email?.split('@')[0] || 'Admin';
   let userEmail = user.email;
   let userInitial = (user.email?.[0] || 'A').toUpperCase();
@@ -22,17 +21,15 @@
       .select('full_name, email')
       .eq('id', user.id)
       .single();
-
     if (profileData) {
       userName = profileData.full_name || userName;
       userEmail = profileData.email || userEmail;
       userInitial = (userName?.charAt(0) || 'A').toUpperCase();
     }
   } catch (e) {
-    console.warn('No se pudo cargar perfil, usando datos de auth:', e.message);
+    console.warn('No se pudo cargar perfil:', e.message);
   }
 
-  // ==================== INICIALIZAR UI ====================
   document.getElementById('userRoleDisplay').textContent = 'Admin';
   document.getElementById('sidebarUserName').textContent = userName;
   document.getElementById('sidebarUserEmail').textContent = userEmail;
@@ -41,7 +38,8 @@
   const settingsEmail = document.getElementById('settingsEmail');
   if (settingsEmail) settingsEmail.value = userEmail;
 
-  // ==================== SIDEBAR ====================
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+
   const sidebar = document.getElementById('sidebar');
   const overlay = document.getElementById('sidebarOverlay');
   const btnMenu = document.getElementById('btnMenu');
@@ -75,7 +73,6 @@
     if (e.key === 'Escape' && sidebarOpen) closeSidebar();
   });
 
-  // ==================== NAVEGACIÓN ====================
   function navigateTo(section) {
     currentSection = section;
     
@@ -103,12 +100,10 @@
     item.addEventListener('click', () => navigateTo(item.dataset.section));
   });
 
-  // ==================== CACHE ====================
   let cachedUsers = [];
   let cachedSales = [];
   let cachedProfiles = {};
 
-  // ==================== CARGAR DATOS ====================
   async function loadAllData() {
     try {
       const [usersResult, salesResult] = await Promise.all([
@@ -152,13 +147,12 @@
     document.getElementById('statRevenue').textContent = '$' + total.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
-  // ==================== TABLA DE USUARIOS ====================
   function loadUsersTable() {
     const tbody = document.getElementById('usersTable');
     if (!tbody) return;
 
     if (!cachedUsers.length) {
-      tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state"><span style="font-size:40px;">👥</span><p>No hay usuarios</p></div></td></tr>';
+      tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state"><span style="font-size:40px;display:block;margin-bottom:8px;">👥</span><p>No hay usuarios</p></div></td></tr>';
       return;
     }
 
@@ -187,14 +181,17 @@
               <option value="seller" ${u.role==='seller'?'selected':''}>Vendedor</option>
               <option value="viewer" ${u.role==='viewer'?'selected':''}>Visualizador</option>
             </select>
-            ${u.id !== user.id ? `<button class="btn-icon delete" onclick="eliminarUsuario('${u.id}')" title="Eliminar usuario" style="width:28px;height:28px;font-size:12px;">✕</button>` : ''}
+            ${u.id !== user.id ? `<button class="btn-icon delete" onclick="eliminarUsuario('${u.id}')" title="Eliminar usuario" style="width:28px;height:28px;">
+              <i data-lucide="trash-2" style="width:12px;height:12px;"></i>
+            </button>` : ''}
           </div>
         </td>
       </tr>
     `).join('');
+    
+    if (typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 50);
   }
 
-  // ==================== CAMBIAR ROL ====================
   window.cambiarRolUsuario = async function(userId, newRole) {
     const roleNames = { admin: 'Admin', seller: 'Vendedor', viewer: 'Visualizador' };
     
@@ -222,7 +219,6 @@
 
   window.changeRole = window.cambiarRolUsuario;
 
-  // ==================== ELIMINAR USUARIO ====================
   window.eliminarUsuario = function(userId) {
     modal.delete('¿Eliminar este usuario permanentemente? Se eliminarán también sus ventas.', async () => {
       const loading = toast.loading('Eliminando usuario...');
@@ -246,13 +242,12 @@
     });
   };
 
-  // ==================== TABLA DE VENTAS ====================
   function loadSalesTable() {
     const tbody = document.getElementById('salesTable');
     if (!tbody) return;
 
     if (!cachedSales.length) {
-      tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><span style="font-size:40px;">💰</span><p>No hay ventas</p></div></td></tr>';
+      tbody.innerHTML = '<tr><td colspan="9"><div class="empty-state"><span style="font-size:40px;display:block;margin-bottom:8px;">💰</span><p>No hay ventas</p></div></td></tr>';
       return;
     }
 
@@ -260,24 +255,35 @@
       const d = new Date(v.date);
       const sellerEmail = cachedProfiles[v.user_id] || 'N/A';
       const desc = (v.description || 'Bidón').replace(/'/g, "\\'");
+      const cliente = (v.client || '').replace(/'/g, "\\'");
+      const obs = (v.notes || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
       return `<tr>
         <td data-label="Fecha">${d.toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'numeric'})}</td>
-        <td data-label="Producto"><span class="tag">💧 ${v.description||'Bidón'}</span></td>
+        <td data-label="Producto"><span class="tag">${v.description||'Bidón'}</span></td>
         <td data-label="Cant">${v.quantity}</td>
         <td data-label="Precio">$${v.price.toFixed(2)}</td>
         <td data-label="Total" style="font-weight:700;color:#3b82f6;">$${v.total.toFixed(2)}</td>
+        <td data-label="Cliente" style="font-size:12px;">${v.client || '—'}</td>
+        <td data-label="Obs." style="font-size:11px;color:#64748b;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${obs}">${v.notes || '—'}</td>
         <td data-label="Vendedor" style="font-size:12px;">${sellerEmail.split('@')[0]}</td>
         <td data-label="">
-          <button class="btn-icon edit" onclick="editarVentaAdmin('${v.id}',${v.quantity},${v.price},'${v.date}','${desc}')" title="Editar">✎</button>
-          <button class="btn-icon delete" onclick="eliminarVentaAdmin('${v.id}')" title="Eliminar">✕</button>
+          <button class="btn-icon edit" onclick="editarVentaAdmin('${v.id}',${v.quantity},${v.price},'${v.date}','${desc}','${cliente}','${obs}')" title="Editar">
+            <i data-lucide="pencil" style="width:14px;height:14px;"></i>
+          </button>
+          <button class="btn-icon delete" onclick="eliminarVentaAdmin('${v.id}')" title="Eliminar">
+            <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
+          </button>
         </td>
       </tr>`;
     }).join('');
+    
+    if (typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 50);
   }
 
-  // ==================== EDITAR VENTA (ADMIN) ====================
-  window.editarVentaAdmin = function(id, qty, price, date, desc) {
+  window.editarVentaAdmin = function(id, qty, price, date, desc, cliente, observaciones) {
     const descStr = desc || '';
+    const clienteStr = cliente || '';
+    const obsStr = observaciones || '';
     const fechaFormateada = date ? new Date(date).toISOString().split('T')[0] : '';
 
     const overlay = document.createElement('div');
@@ -287,8 +293,10 @@
     `;
 
     overlay.innerHTML = `
-      <div style="background:#fff;border-radius:20px;padding:24px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
-        <h3 style="font-size:18px;font-weight:700;color:#0f172a;margin-bottom:20px;">✏️ Editar Venta</h3>
+      <div style="background:#fff;border-radius:20px;padding:24px;width:100%;max-width:440px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+        <h3 style="font-size:18px;font-weight:700;color:#0f172a;margin-bottom:20px;">
+          <i data-lucide="pencil" style="width:18px;height:18px;vertical-align:middle;margin-right:6px;"></i>Editar Venta
+        </h3>
         
         <div style="margin-bottom:14px;">
           <label style="display:block;font-size:12px;font-weight:600;color:#475569;margin-bottom:5px;">Producto</label>
@@ -297,7 +305,8 @@
             <option value="Bidón 12L" ${descStr.includes('12L')?'selected':''}>Bidón 12L</option>
             <option value="Bidón 5L" ${descStr.includes('5L')?'selected':''}>Bidón 5L</option>
             <option value="Bidón 1L" ${descStr.includes('1L')?'selected':''}>Bidón 1L</option>
-            <option value="Botella 500ml" ${descStr.includes('500ml')?'selected':''}>Botella 500ml</option>
+            <option value="Botella 500ml" ${descStr.includes('500ml') && !descStr.includes('Pacas')?'selected':''}>Botella 500ml</option>
+            <option value="Pacas de botellas 500ml" ${descStr.includes('Pacas')?'selected':''}>Pacas de botellas 500ml</option>
           </select>
         </div>
         
@@ -312,9 +321,19 @@
           </div>
         </div>
         
-        <div style="margin-bottom:20px;">
+        <div style="margin-bottom:14px;">
+          <label style="display:block;font-size:12px;font-weight:600;color:#475569;margin-bottom:5px;">Cliente</label>
+          <input type="text" id="editCliente" value="${clienteStr.replace(/'/g, "&#39;")}" placeholder="Nombre del cliente" style="width:100%;padding:10px;border:1px solid #e2e8f0;border-radius:10px;font-size:14px;font-family:inherit;">
+        </div>
+        
+        <div style="margin-bottom:14px;">
           <label style="display:block;font-size:12px;font-weight:600;color:#475569;margin-bottom:5px;">Fecha</label>
           <input type="date" id="editFecha" value="${fechaFormateada}" style="width:100%;padding:10px;border:1px solid #e2e8f0;border-radius:10px;font-size:14px;font-family:inherit;">
+        </div>
+        
+        <div style="margin-bottom:20px;">
+          <label style="display:block;font-size:12px;font-weight:600;color:#475569;margin-bottom:5px;">Observaciones</label>
+          <textarea id="editObservaciones" rows="2" placeholder="Notas adicionales..." style="width:100%;padding:10px;border:1px solid #e2e8f0;border-radius:10px;font-size:14px;font-family:inherit;resize:vertical;background:#f8fafc;">${obsStr.replace(/'/g, "&#39;")}</textarea>
         </div>
         
         <div style="display:flex;gap:10px;">
@@ -326,6 +345,8 @@
 
     document.body.appendChild(overlay);
     document.body.style.overflow = 'hidden';
+    
+    if (typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 50);
 
     const cerrar = () => { overlay.remove(); document.body.style.overflow = ''; };
     overlay.addEventListener('click', (e) => { if (e.target === overlay) cerrar(); });
@@ -336,6 +357,8 @@
       const nCant = parseInt(document.getElementById('editCantidad').value);
       const nPrecio = parseFloat(document.getElementById('editPrecio').value);
       const nFecha = document.getElementById('editFecha').value;
+      const nCliente = document.getElementById('editCliente').value.trim();
+      const nObs = document.getElementById('editObservaciones').value.trim();
 
       if (!nCant || nCant < 1) { toast.warning('Cantidad inválida'); return; }
       if (!nPrecio || nPrecio <= 0) { toast.warning('Precio inválido'); return; }
@@ -345,7 +368,9 @@
         const { error } = await window.AquaTrack.db.from('sales').update({
           quantity: nCant, price: nPrecio, total: nCant * nPrecio,
           date: nFecha ? new Date(nFecha + 'T12:00:00').toISOString() : new Date().toISOString(),
-          description: nTamano
+          description: nTamano,
+          client: nCliente || null,
+          notes: nObs || null
         }).eq('id', id);
         if (error) throw error;
 
@@ -355,6 +380,8 @@
           cachedSales[idx].price = nPrecio;
           cachedSales[idx].total = nCant * nPrecio;
           cachedSales[idx].description = nTamano;
+          cachedSales[idx].client = nCliente || null;
+          cachedSales[idx].notes = nObs || null;
           if (nFecha) cachedSales[idx].date = new Date(nFecha + 'T12:00:00').toISOString();
         }
 
@@ -370,7 +397,6 @@
     });
   };
 
-  // ==================== ELIMINAR VENTA ====================
   window.eliminarVentaAdmin = function(id) {
     modal.delete('¿Eliminar esta venta?', async () => {
       const loading = toast.loading('Eliminando...');
@@ -391,7 +417,6 @@
     });
   };
 
-  // ==================== GRÁFICOS ====================
   let salesChart = null, productsChart = null;
 
   function renderChartsFromCache() {
@@ -446,7 +471,6 @@
     }
   }
 
-  // ==================== BÚSQUEDA ====================
   document.getElementById('globalSearch')?.addEventListener('input', function(e) {
     const term = e.target.value.toLowerCase();
     document.querySelectorAll('.content-section.active tbody tr').forEach(row => {
@@ -454,7 +478,6 @@
     });
   });
 
-  // ==================== FILTRO FECHA VENTAS ====================
   window.filtrarVentasAdmin = function() {
     const filterDate = document.getElementById('filterDate')?.value;
     const tbody = document.getElementById('salesTable');
@@ -462,32 +485,41 @@
     
     const filtered = cachedSales.filter(s => new Date(s.date).toISOString().split('T')[0] === filterDate);
     if (!filtered.length) {
-      tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><p>Sin ventas en esta fecha</p></div></td></tr>';
+      tbody.innerHTML = '<tr><td colspan="9"><div class="empty-state"><p>Sin ventas en esta fecha</p></div></td></tr>';
     } else {
       tbody.innerHTML = filtered.map(v => {
         const d = new Date(v.date);
         const sellerEmail = cachedProfiles[v.user_id] || 'N/A';
         const desc = (v.description || 'Bidón').replace(/'/g, "\\'");
+        const cliente = (v.client || '').replace(/'/g, "\\'");
+        const obs = (v.notes || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
         return `<tr>
           <td data-label="Fecha">${d.toLocaleDateString('es-ES')}</td>
-          <td data-label="Producto"><span class="tag">💧 ${v.description||'Bidón'}</span></td>
+          <td data-label="Producto"><span class="tag">${v.description||'Bidón'}</span></td>
           <td data-label="Cant">${v.quantity}</td>
           <td data-label="Precio">$${v.price.toFixed(2)}</td>
           <td data-label="Total" style="font-weight:700;color:#3b82f6;">$${v.total.toFixed(2)}</td>
+          <td data-label="Cliente" style="font-size:12px;">${v.client || '—'}</td>
+          <td data-label="Obs." style="font-size:11px;color:#64748b;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${obs}">${v.notes || '—'}</td>
           <td data-label="Vendedor">${sellerEmail.split('@')[0]}</td>
           <td data-label="">
-            <button class="btn-icon edit" onclick="editarVentaAdmin('${v.id}',${v.quantity},${v.price},'${v.date}','${desc}')">✎</button>
-            <button class="btn-icon delete" onclick="eliminarVentaAdmin('${v.id}')">✕</button>
+            <button class="btn-icon edit" onclick="editarVentaAdmin('${v.id}',${v.quantity},${v.price},'${v.date}','${desc}','${cliente}','${obs}')" title="Editar">
+              <i data-lucide="pencil" style="width:14px;height:14px;"></i>
+            </button>
+            <button class="btn-icon delete" onclick="eliminarVentaAdmin('${v.id}')" title="Eliminar">
+              <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
+            </button>
           </td>
         </tr>`;
       }).join('');
+      
+      if (typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 50);
     }
   };
 
   window.exportUsers = () => toast.info('Exportación en desarrollo', 'info', 3000);
   window.exportSales = () => toast.info('Exportación en desarrollo', 'info', 3000);
 
-  // ==================== INICIAR ====================
   await loadAllData();
   navigateTo('users');
   setInterval(loadAllData, 60000);

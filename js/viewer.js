@@ -1,16 +1,16 @@
 /**
  * viewer.js - Panel Visualizador AquaTrack DW
- * Solo lectura · Resumen + Ventas · Nombre real
+ * Solo lectura · Resumen + Ventas + Cliente + Observaciones
+ * Protegido por roleGuard
  */
 (async function() {
   'use strict';
 
-  const { data: { user } } = await window.AquaTrack.db.auth.getUser();
-  if (!user) { location.href = 'index.html'; return; }
+  const user = await verifyPanelAccess(['viewer']);
+  if (!user) return;
 
   console.log('✅ Visualizador autenticado:', user.email);
 
-  // ==================== OBTENER DATOS DEL PERFIL ====================
   let userName = user.email?.split('@')[0] || 'Visualizador';
   let userEmail = user.email;
   let userInitial = (user.email?.[0] || 'V').toUpperCase();
@@ -21,7 +21,6 @@
       .select('full_name, email')
       .eq('id', user.id)
       .single();
-
     if (profileData) {
       userName = profileData.full_name || userName;
       userEmail = profileData.email || userEmail;
@@ -31,42 +30,46 @@
     console.warn('No se pudo cargar perfil:', e.message);
   }
 
-  // ==================== UI ====================
   document.getElementById('userRoleDisplay').textContent = 'Visualizador';
   document.getElementById('sidebarUserName').textContent = userName;
   document.getElementById('sidebarUserEmail').textContent = userEmail;
   document.getElementById('userAvatar').textContent = userInitial;
 
-  // ==================== SIDEBAR ====================
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+
   const sidebar = document.getElementById('sidebar');
   const overlay = document.getElementById('sidebarOverlay');
   const btnMenu = document.getElementById('btnMenu');
   let currentSection = 'overview';
   let sidebarOpen = false;
 
-  function toggleSidebar() {
-    if (sidebarOpen) {
-      sidebar.classList.remove('open');
-      overlay.classList.remove('visible');
-      setTimeout(() => { overlay.style.display = 'none'; }, 250);
-      document.body.style.overflow = '';
-      sidebarOpen = false;
-    } else {
-      sidebar.classList.add('open');
-      overlay.style.display = 'block';
-      overlay.classList.add('visible');
-      document.body.style.overflow = 'hidden';
-      sidebarOpen = true;
-    }
+  function openSidebar() {
+    sidebar.classList.add('open');
+    overlay.style.display = 'block';
+    overlay.classList.add('visible');
+    document.body.style.overflow = 'hidden';
+    sidebarOpen = true;
   }
 
-  btnMenu.addEventListener('click', (e) => { e.stopPropagation(); toggleSidebar(); });
-  overlay.addEventListener('click', toggleSidebar);
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && sidebarOpen) toggleSidebar();
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('visible');
+    setTimeout(() => { overlay.style.display = 'none'; }, 250);
+    document.body.style.overflow = '';
+    sidebarOpen = false;
+  }
+
+  btnMenu.addEventListener('click', (e) => {
+    e.stopPropagation();
+    sidebarOpen ? closeSidebar() : openSidebar();
   });
 
-  // ==================== NAVEGACIÓN ====================
+  overlay.addEventListener('click', closeSidebar);
+  
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && sidebarOpen) closeSidebar();
+  });
+
   function navigateTo(section) {
     currentSection = section;
     
@@ -79,24 +82,32 @@
     document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
     document.getElementById(`section-${section}`)?.classList.add('active');
     
-    if (window.innerWidth < 1200) toggleSidebar();
+    // Cerrar sidebar en móvil solo si está abierto, sin forzar toggle
+    if (window.innerWidth < 1200 && sidebarOpen) {
+      closeSidebar();
+    }
     
     if (section === 'sales') loadSalesTable();
     if (section === 'overview') setTimeout(() => renderCharts(), 150);
   }
 
   document.querySelectorAll('.nav-item').forEach(item => {
-    item.addEventListener('click', (e) => { e.preventDefault(); navigateTo(item.dataset.section); });
-  });
-  document.querySelectorAll('.bottom-nav-item').forEach(item => {
-    item.addEventListener('click', () => navigateTo(item.dataset.section));
+    item.addEventListener('click', (e) => {
+      e.preventDefault();
+      navigateTo(item.dataset.section);
+    });
   });
 
-  // ==================== CACHE ====================
+  document.querySelectorAll('.bottom-nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+      // Solo navega, no abre/cierra el sidebar
+      navigateTo(item.dataset.section);
+    });
+  });
+
   let cachedSales = [];
   let cachedProfiles = {};
 
-  // ==================== CARGAR DATOS ====================
   async function loadAllData() {
     try {
       const { data: sales, error } = await window.AquaTrack.db
@@ -148,13 +159,12 @@
       [...new Set(cachedSales.map(s => s.description).filter(Boolean))].length;
   }
 
-  // ==================== TABLA ====================
   function loadSalesTable() {
     const tbody = document.getElementById('salesTable');
     if (!tbody) return;
 
     if (!cachedSales.length) {
-      tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><span style="font-size:40px;">📋</span><p>No hay ventas registradas</p></div></td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><span style="font-size:40px;display:block;margin-bottom:8px;">📋</span><p>No hay ventas registradas</p></div></td></tr>';
       return;
     }
 
@@ -163,16 +173,17 @@
       const seller = (cachedProfiles[v.user_id] || 'N/A').split('@')[0];
       return `<tr>
         <td data-label="Fecha">${d.toLocaleDateString('es-ES', { day:'numeric', month:'short', year:'numeric' })}</td>
-        <td data-label="Producto"><span class="tag">💧 ${v.description || 'Bidón'}</span></td>
+        <td data-label="Producto"><span class="tag">${v.description || 'Bidón'}</span></td>
         <td data-label="Cantidad">${v.quantity}</td>
         <td data-label="Precio">$${v.price.toFixed(2)}</td>
         <td data-label="Total" style="font-weight:700;color:#10b981;">$${v.total.toFixed(2)}</td>
+        <td data-label="Cliente" style="font-size:12px;">${v.client || '—'}</td>
         <td data-label="Vendedor" style="font-size:12px;">${seller}</td>
+        <td data-label="Obs." style="font-size:11px;color:#64748b;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${(v.notes || '').replace(/"/g, '&quot;')}">${v.notes || '—'}</td>
       </tr>`;
     }).join('');
   }
 
-  // ==================== GRÁFICOS ====================
   let overviewSalesChart = null;
   let overviewProductsChart = null;
 
@@ -232,15 +243,14 @@
     }
   }
 
-  // ==================== BÚSQUEDA ====================
-  document.getElementById('globalSearch')?.addEventListener('input', function(e) {
+  // Buscador local en la sección ventas
+  document.getElementById('salesSearch')?.addEventListener('input', function(e) {
     const term = e.target.value.toLowerCase();
     document.querySelectorAll('#section-sales tbody tr').forEach(row => {
       row.style.display = row.textContent.toLowerCase().includes(term) ? '' : 'none';
     });
   });
 
-  // ==================== FILTRO POR FECHA ====================
   window.filtrarPorFecha = function() {
     const filterDate = document.getElementById('filterDate')?.value;
     const tbody = document.getElementById('salesTable');
@@ -251,18 +261,20 @@
     );
     
     if (!filtered.length) {
-      tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><p>Sin ventas en esta fecha</p></div></td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><p>Sin ventas en esta fecha</p></div></td></tr>';
     } else {
       tbody.innerHTML = filtered.map(v => {
         const d = new Date(v.date);
         const seller = (cachedProfiles[v.user_id] || 'N/A').split('@')[0];
         return `<tr>
           <td data-label="Fecha">${d.toLocaleDateString('es-ES')}</td>
-          <td data-label="Producto"><span class="tag">💧 ${v.description || 'Bidón'}</span></td>
+          <td data-label="Producto"><span class="tag">${v.description || 'Bidón'}</span></td>
           <td data-label="Cantidad">${v.quantity}</td>
           <td data-label="Precio">$${v.price.toFixed(2)}</td>
           <td data-label="Total" style="font-weight:700;color:#10b981;">$${v.total.toFixed(2)}</td>
+          <td data-label="Cliente" style="font-size:12px;">${v.client || '—'}</td>
           <td data-label="Vendedor">${seller}</td>
+          <td data-label="Obs." style="font-size:11px;color:#64748b;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${(v.notes || '').replace(/"/g, '&quot;')}">${v.notes || '—'}</td>
         </tr>`;
       }).join('');
     }
@@ -270,7 +282,6 @@
 
   window.exportarVentas = () => toast.info('Exportación en desarrollo', 'info', 3000);
 
-  // ==================== INICIAR ====================
   await loadAllData();
   navigateTo('overview');
   setInterval(loadAllData, 60000);
