@@ -400,46 +400,5 @@
 <script src="js/auth.js"></script>
 <script src="js/inventory.js"></script>
 <script src="js/admin.js"></script>
-<script>
-// Prueba directa de cámara
-async function probarCamara() {
-    if (typeof window.Capacitor === 'undefined') {
-        alert('Capacitor no detectado - esto es un navegador');
-        return;
-    }
-    if (!window.Capacitor.isNativePlatform()) {
-        alert('No es plataforma nativa');
-        return;
-    }
-    try {
-        const { Camera, CameraResultType, CameraSource } = await import('@capacitor/camera');
-        
-        // Verificar permisos
-        const permStatus = await Camera.checkPermissions();
-        alert('Permiso cámara: ' + permStatus.camera);
-        
-        if (permStatus.camera !== 'granted') {
-            const request = await Camera.requestPermissions();
-            alert('Solicitado: ' + request.camera);
-            if (request.camera !== 'granted') return;
-        }
-        
-        // Tomar foto
-        const image = await Camera.getPhoto({
-            quality: 90,
-            resultType: CameraResultType.Base64,
-            source: CameraSource.Camera,
-            width: 800,
-            height: 800
-        });
-        
-        alert('✅ Foto tomada! Formato: ' + image.format + ', Tamaño base64: ' + image.base64String.length);
-        
-    } catch (e) {
-        alert('❌ Error: ' + e.message);
-    }
-}
-</script>
-<button onclick="probarCamara()" style="position:fixed;bottom:80px;right:20px;z-index:9999;padding:15px;background:red;color:white;border:none;border-radius:50%;font-size:20px;cursor:pointer;">📸</button>
 </body>
 </html>
