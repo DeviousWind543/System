@@ -39,7 +39,7 @@ async function loadInventory() {
         tbody.innerHTML = data.map(item => {
             const sc = item.quantity <= 0 ? 'stock-empty' : item.quantity <= (item.min_quantity || 5) ? 'stock-low' : 'stock-good';
             const img = item.image_url
-                ? `<img src="${item.image_url}" style="width:44px;height:44px;border-radius:10px;object-fit:cover;cursor:pointer;border:2px solid #e2e8f0" onclick="window.open('${item.image_url}')" onerror="this.style.display='none'">`
+                ? `<img src="${item.image_url}" style="width:44px;height:44px;border-radius:10px;object-fit:cover;cursor:pointer;border:2px solid #e2e8f0" onclick="previewImage('${item.image_url}', '${escapeHtml(item.name).replace(/'/g, "\\'")}')" onerror="this.style.display='none'">`
                 : `<div style="width:44px;height:44px;border-radius:10px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:20px">${getInvEmoji(item.category)}</div>`;
             const actions = canEdit ? `<td data-label="Acciones">
                 <button class="btn-icon edit" onclick="editInventoryItem('${item.id}')"><i data-lucide="pencil" style="width:14px;height:14px"></i></button>
@@ -143,7 +143,14 @@ async function editInventoryItem(id) {
         </div>
         <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:#475569">Descripción</label><textarea id="eDesc" rows="2" style="width:100%;padding:10px;border:1px solid #e2e8f0;border-radius:10px;font-size:14px;resize:vertical">${escapeHtml(item.description||'')}</textarea></div>
         <div style="margin-bottom:16px"><label style="font-size:12px;font-weight:600;color:#475569">📷 Nueva imagen</label><input type="file" id="eImg" accept="image/*" style="font-size:13px"></div>
-        ${item.image_url ? `<div style="margin-bottom:10px"><img src="${item.image_url}" style="width:80px;height:80px;border-radius:10px;object-fit:cover;border:2px solid #e2e8f0"></div>` : ''}
+       <div data-img-container style="margin-bottom:10px;${item.image_url ? '' : 'display:none;'}display:flex;align-items:center;gap:10px;">
+    ${item.image_url ? `
+        <img src="${item.image_url}" style="width:80px;height:80px;border-radius:10px;object-fit:cover;border:2px solid #e2e8f0;cursor:pointer" onclick="previewImage('${item.image_url}','${escapeHtml(item.name)}')">
+        <button type="button" onclick="removeImage('${item.id}')" style="background:#fee2e2;color:#991b1b;border:1px solid #fecaca;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;">
+            <i data-lucide="trash-2" style="width:14px;height:14px;"></i> Eliminar foto
+        </button>
+    ` : ''}
+</div>
         <div style="display:flex;gap:10px">
             <button id="eCancel" style="flex:1;padding:12px;border-radius:10px;border:1px solid #e2e8f0;background:#f1f5f9;color:#475569;font-weight:600;cursor:pointer">Cancelar</button>
             <button id="eSave" style="flex:1;padding:12px;border-radius:10px;border:none;background:#3b82f6;color:#fff;font-weight:600;cursor:pointer">Guardar</button>
@@ -164,8 +171,8 @@ async function editInventoryItem(id) {
         if (!nName) { toast.warning('Nombre requerido'); return; }
         const loading = toast.loading('Actualizando...');
         try {
-            let imgUrl = item.image_url;
-            if (nFile) {
+                let imgUrl = document.querySelector('[data-img-container]')?.style.display === 'none' ? null : item.image_url;
+                if (nFile) {
                 if (item.image_url) await window.AquaTrack.db.storage.from('inventory-images').remove([item.image_url.split('/').pop()]);
                 const ext = nFile.name.split('.').pop();
                 const fn = 'inv-'+Date.now()+'.'+ext;
@@ -307,7 +314,99 @@ async function adjustInventoryOnEdit(oldProduct, oldQty, newProduct, newQty) {
     }
 }
 
-// Exponer funciones globales
+// ==================== VISOR DE IMAGEN ====================
+function previewImage(url, itemName) {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;z-index:99999;padding:20px;cursor:pointer;';
+    
+    overlay.innerHTML = `
+        <div style="position:relative;max-width:90vw;max-height:90vh;display:flex;flex-direction:column;align-items:center;">
+            <button style="position:absolute;top:-40px;right:0;background:rgba(255,255,255,0.2);border:none;color:white;width:36px;height:36px;border-radius:50%;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;" 
+                    onmouseover="this.style.background='rgba(255,255,255,0.4)'" 
+                    onmouseout="this.style.background='rgba(255,255,255,0.2)'">×</button>
+            <img src="${url}" alt="${escapeHtml(itemName)}" 
+                 style="max-width:90vw;max-height:80vh;border-radius:16px;box-shadow:0 25px 80px rgba(0,0,0,0.5);object-fit:contain;"
+                 onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23f1f5f9%22 width=%22200%22 height=%22200%22 rx=%2216%22/><text x=%22100%22 y=%22110%22 text-anchor=%22middle%22 font-size=%2260%22>📷</text></svg>'">
+            <p style="color:white;font-size:16px;font-weight:600;margin-top:16px;text-align:center;">${escapeHtml(itemName)}</p>
+        </div>
+    `;
+    
+    document.body.appendChild(overlay);
+    document.body.style.overflow = 'hidden';
+    
+    // Cerrar al hacer clic fuera de la imagen o en el botón X
+    const closeBtn = overlay.querySelector('button');
+    closeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        overlay.remove();
+        document.body.style.overflow = '';
+    });
+    
+    overlay.addEventListener('click', () => {
+        overlay.remove();
+        document.body.style.overflow = '';
+    });
+    
+    // Cerrar con Escape
+    const handleEscape = (e) => {
+        if (e.key === 'Escape') {
+            overlay.remove();
+            document.body.style.overflow = '';
+            document.removeEventListener('keydown', handleEscape);
+        }
+    };
+    document.addEventListener('keydown', handleEscape);
+}
+
+// ==================== ELIMINAR IMAGEN DE ITEM (sin cerrar formulario) ====================
+async function removeImage(itemId) {
+    const confirmed = await modal.confirm('¿Eliminar la foto de este item?', 'Quitar imagen', 'warning');
+    if (!confirmed) return;
+    
+    const loading = toast.loading('Eliminando imagen...');
+    try {
+        // Obtener la URL de la imagen actual
+        const { data: item } = await window.AquaTrack.db
+            .from('inventory')
+            .select('image_url')
+            .eq('id', itemId)
+            .single();
+
+        // Eliminar del storage
+        if (item?.image_url) {
+            const fileName = item.image_url.split('/').pop();
+            await window.AquaTrack.db.storage
+                .from('inventory-images')
+                .remove([fileName]);
+        }
+
+        // Actualizar la BD
+        await window.AquaTrack.db
+            .from('inventory')
+            .update({ image_url: null, updated_at: new Date().toISOString() })
+            .eq('id', itemId);
+
+        loading.close();
+        toast.success('Imagen eliminada');
+        
+        // Buscar el contenedor de la imagen en el formulario abierto
+        const imgContainer = document.querySelector('[data-img-container]');
+        if (imgContainer) {
+            // Ocultar el contenedor de la imagen actual
+            imgContainer.style.display = 'none';
+            // Limpiar el campo de archivo por si acaso
+            const fileInput = document.getElementById('eImg');
+            if (fileInput) fileInput.value = '';
+        }
+        
+    } catch (e) {
+        loading.close();
+        toast.error('Error: ' + e.message);
+    }
+}
+
+window.removeImage = removeImage;
+window.previewImage = previewImage;
 window.revertDiscountFromInventory = revertDiscountFromInventory;
 window.adjustInventoryOnEdit = adjustInventoryOnEdit;
 window.loadInventory = loadInventory;
