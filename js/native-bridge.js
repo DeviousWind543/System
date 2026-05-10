@@ -1,6 +1,6 @@
 /**
  * native-bridge.js - Funcionalidades nativas para AquaTrack DW
- * Cámara, galería, botón retroceder
+ * Con verificación de permisos de cámara (Android 13+)
  */
 (function() {
 
@@ -8,31 +8,50 @@ const isNativeApp = () => {
     return typeof window.Capacitor !== 'undefined' && window.Capacitor.isNativePlatform();
 };
 
-// ==================== MANEJAR BOTÓN RETROCEDER ====================
+// ==================== VERIFICAR PERMISOS DE CÁMARA ====================
+async function checkAndRequestCameraPermission() {
+    if (!isNativeApp()) return true;
+    
+    try {
+        const { Camera } = await import('@capacitor/camera');
+        const status = await Camera.checkPermissions();
+        
+        console.log('📷 Estado de permisos:', status.camera);
+        
+        if (status.camera === 'granted') {
+            return true;
+        }
+        
+        // Solicitar permisos
+        const request = await Camera.requestPermissions();
+        console.log('📷 Permiso solicitado:', request.camera);
+        
+        if (request.camera === 'granted') {
+            return true;
+        }
+        
+        if (request.camera === 'denied') {
+            toast.warning('Permiso de cámara denegado. Actívalo en Ajustes > Aplicaciones > AquaTrack > Permisos');
+        }
+        
+        return false;
+    } catch (error) {
+        console.error('Error verificando permisos:', error);
+        return false;
+    }
+}
+
+// ==================== BOTÓN RETROCEDER ====================
 if (isNativeApp()) {
     window.Capacitor.Plugins.App.addListener('backButton', ({ canGoBack }) => {
-        // Cerrar modales o overlays si están abiertos
-        const modalOverlay = document.querySelector('.modal-overlay-aw');
         const imgOverlay = document.querySelector('[style*="z-index:99999"]');
         const editOverlay = document.querySelector('[style*="z-index:9999"]');
+        const modalOverlay = document.querySelector('.modal-overlay-aw');
         
-        if (imgOverlay) {
-            imgOverlay.remove();
-            document.body.style.overflow = '';
-            return;
-        }
-        if (editOverlay) {
-            editOverlay.remove();
-            document.body.style.overflow = '';
-            return;
-        }
-        if (modalOverlay) {
-            modalOverlay.remove();
-            document.body.style.overflow = '';
-            return;
-        }
+        if (imgOverlay) { imgOverlay.remove(); document.body.style.overflow = ''; return; }
+        if (editOverlay) { editOverlay.remove(); document.body.style.overflow = ''; return; }
+        if (modalOverlay) { modalOverlay.remove(); document.body.style.overflow = ''; return; }
         
-        // Cerrar sidebar si está abierto
         const sidebar = document.getElementById('sidebar');
         if (sidebar && sidebar.classList.contains('open')) {
             sidebar.classList.remove('open');
@@ -42,7 +61,6 @@ if (isNativeApp()) {
             return;
         }
         
-        // Si no hay nada que cerrar, preguntar antes de salir
         if (!canGoBack) {
             if (confirm('¿Deseas salir de AquaTrack?')) {
                 window.Capacitor.Plugins.App.exitApp();
@@ -53,9 +71,29 @@ if (isNativeApp()) {
     });
 }
 
+// ==================== CONVERTIR BASE64 A FILE ====================
+function base64ToFile(base64String, format) {
+    const byteCharacters = atob(base64String);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    const blob = new Blob([byteArray], { type: `image/${format}` });
+    return new File([blob], `photo-${Date.now()}.${format}`, { type: `image/${format}` });
+}
+
 // ==================== TOMAR FOTO CON CÁMARA ====================
 async function takePhoto() {
-    if (!isNativeApp()) return null;
+    if (!isNativeApp()) {
+        console.log('📷 No es app nativa, usando input file');
+        return null;
+    }
+    
+    // Verificar permisos primero
+    const hasPermission = await checkAndRequestCameraPermission();
+    if (!hasPermission) return null;
+    
     try {
         const { Camera, CameraResultType, CameraSource } = await import('@capacitor/camera');
         const image = await Camera.getPhoto({
@@ -79,7 +117,15 @@ async function takePhoto() {
 
 // ==================== ELEGIR DE GALERÍA ====================
 async function pickFromGallery() {
-    if (!isNativeApp()) return null;
+    if (!isNativeApp()) {
+        console.log('🖼️ No es app nativa, usando input file');
+        return null;
+    }
+    
+    // Verificar permisos primero
+    const hasPermission = await checkAndRequestCameraPermission();
+    if (!hasPermission) return null;
+    
     try {
         const { Camera, CameraResultType, CameraSource } = await import('@capacitor/camera');
         const image = await Camera.getPhoto({
@@ -101,83 +147,62 @@ async function pickFromGallery() {
     }
 }
 
-// ==================== CONVERTIR BASE64 A FILE ====================
-function base64ToFile(base64String, format) {
-    const byteCharacters = atob(base64String);
-    const byteNumbers = new Array(byteCharacters.length);
-    for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i);
+// ==================== FUNCIONES PARA BOTONES DEL FORMULARIO ====================
+async function openCameraForInput(inputId) {
+    if (!isNativeApp()) {
+        // En navegador, abrir el input file
+        document.getElementById(inputId)?.click();
+        return;
     }
-    const byteArray = new Uint8Array(byteNumbers);
-    const blob = new Blob([byteArray], { type: `image/${format}` });
-    return new File([blob], `photo-${Date.now()}.${format}`, { type: `image/${format}` });
-}
-
-// ==================== CONFIGURAR BOTONES DE CÁMARA/GALERÍA ====================
-function setupNativeImagePicker(inputId) {
-    const fileInput = document.getElementById(inputId);
-    if (!fileInput) return;
-    if (!isNativeApp()) return;
-
-    // Ocultar input file nativo
-    fileInput.style.display = 'none';
     
-    // Crear botones personalizados
-    const btnContainer = document.createElement('div');
-    btnContainer.style.cssText = 'display:flex;gap:8px;margin-top:8px;';
-    btnContainer.innerHTML = `
-        <button type="button" id="${inputId}_camera" style="flex:1;padding:10px;border-radius:10px;border:1px solid #e2e8f0;background:#f8fafc;color:#475569;font-weight:600;cursor:pointer;font-family:inherit;font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px;">
-            📸 Cámara
-        </button>
-        <button type="button" id="${inputId}_gallery" style="flex:1;padding:10px;border-radius:10px;border:1px solid #e2e8f0;background:#f8fafc;color:#475569;font-weight:600;cursor:pointer;font-family:inherit;font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px;">
-            🖼️ Galería
-        </button>
-    `;
-    
-    fileInput.parentNode.insertBefore(btnContainer, fileInput.nextSibling);
-    
-    document.getElementById(`${inputId}_camera`).addEventListener('click', async () => {
-        const file = await takePhoto();
-        if (file) {
+    const file = await takePhoto();
+    if (file) {
+        const input = document.getElementById(inputId);
+        if (input) {
             const dt = new DataTransfer();
             dt.items.add(file);
-            fileInput.files = dt.files;
-            // Mostrar preview
-            showFilePreview(inputId, file);
+            input.files = dt.files;
+            showPreview(inputId, file);
         }
-    });
+    }
+}
+
+async function openGalleryForInput(inputId) {
+    if (!isNativeApp()) {
+        document.getElementById(inputId)?.click();
+        return;
+    }
     
-    document.getElementById(`${inputId}_gallery`).addEventListener('click', async () => {
-        const file = await pickFromGallery();
-        if (file) {
+    const file = await pickFromGallery();
+    if (file) {
+        const input = document.getElementById(inputId);
+        if (input) {
             const dt = new DataTransfer();
             dt.items.add(file);
-            fileInput.files = dt.files;
-            showFilePreview(inputId, file);
+            input.files = dt.files;
+            showPreview(inputId, file);
         }
-    });
+    }
 }
 
-// ==================== MOSTRAR PREVIEW DEL ARCHIVO SELECCIONADO ====================
-function showFilePreview(inputId, file) {
-    const previewContainer = document.getElementById(`${inputId}_preview`);
-    if (!previewContainer) return;
-    
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        previewContainer.innerHTML = `
-            <img src="${e.target.result}" style="width:80px;height:80px;border-radius:10px;object-fit:cover;border:2px solid #10b981;">
-            <span style="font-size:11px;color:#10b981;font-weight:600;">✅ Imagen lista</span>
-        `;
-        previewContainer.style.display = 'flex';
-    };
-    reader.readAsDataURL(file);
+function showPreview(inputId, file) {
+    const preview = document.getElementById(inputId + '_preview');
+    if (preview) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            preview.innerHTML = `<img src="${e.target.result}" style="width:80px;height:80px;border-radius:10px;object-fit:cover;border:2px solid #10b981;"><span style="font-size:11px;color:#10b981;font-weight:600;">✅ Imagen lista</span>`;
+            preview.style.display = 'flex';
+        };
+        reader.readAsDataURL(file);
+    }
 }
 
-// Exponer funciones
+// ==================== EXPORTAR FUNCIONES GLOBALES ====================
 window.isNativeApp = isNativeApp;
-window.setupNativeImagePicker = setupNativeImagePicker;
 window.takePhoto = takePhoto;
 window.pickFromGallery = pickFromGallery;
+window.openCameraForInput = openCameraForInput;
+window.openGalleryForInput = openGalleryForInput;
+window.checkAndRequestCameraPermission = checkAndRequestCameraPermission;
 
 })();
