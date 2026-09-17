@@ -11,7 +11,7 @@ window.AquaTrack = window.AquaTrack || {};
 window.AquaTrack.config = Object.freeze({
   // ✅ TUS CREDENCIALES REALES DE SUPABASE
   SUPABASE_URL: 'https://jglsbwrmqknsegvuiyes.supabase.co',
-  SUPABASE_KEY: 'sb_publishable_YToISTqTz1bHjmd3Bt4FaA_vEF_OLfA',
+  SUPABASE_KEY: 'sb_publishable_VDnVfV0ZuoETNzjizMGHIA_N58YJOKS',
   
   APP_NAME: 'AquaTrack DW',
   APP_VERSION: '2.0.0',
