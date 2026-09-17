@@ -10,7 +10,7 @@ window.AquaTrack = window.AquaTrack || {};
 // Congelamos la configuración para evitar modificaciones accidentales
 window.AquaTrack.config = Object.freeze({
   // ✅ TUS CREDENCIALES REALES DE SUPABASE
-  SUPABASE_URL: 'https://osotakxhfdtixghcrlvv.supabase.co/rest/v1/',
+  SUPABASE_URL: 'https://osotakxhfdtixghcrlvv.supabase.co',
   SUPABASE_KEY: 'sb_publishable_VDnVfV0ZuoETNzjizMGHIA_N58YJOKS',
   
   APP_NAME: 'AquaTrack DW',
